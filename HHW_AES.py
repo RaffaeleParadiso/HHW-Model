@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from configuration import (EUOptionPriceFromMCPathsGeneralizedStochIR, CP, NPaths,
-                            NSteps, lambd, eta, S0, T, K, P0T, gamma, vbar, v0,
-                            rhoxr, rhoxv, kappa)
+from config import *
 
 def CIR_Sample(NPaths,kappa,gamma,vbar,s,t,v_s):
     delta = 4.0 *kappa*vbar/gamma/gamma

@@ -2,13 +2,12 @@
 """
 import matplotlib.pyplot as plt
 import numpy as np
-from configuration import (EUOptionPriceFromMCPathsGeneralizedStochIR, CP, NPaths,
-                            NSteps, lambd, eta, S0, T, K, P0T, gamma, vbar, v0,
-                            rhoxr, rhoxv, kappa)
+from config import *
+
 np.random.seed(1)
 
 FIGURE = False
-SAVE = True
+SAVE = False
 
 dt = 0.00001
 f0T = lambda t: -(np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)  # forward rate
