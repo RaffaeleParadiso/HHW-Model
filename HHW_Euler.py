@@ -8,7 +8,7 @@ from configuration import (EUOptionPriceFromMCPathsGeneralizedStochIR, CP, NPath
 np.random.seed(1)
 
 FIGURE = False
-SAVE = False
+SAVE = True
 
 dt = 0.00001
 f0T = lambda t: -(np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)  # forward rate
@@ -56,7 +56,7 @@ for i in range(0,NSteps):
     term1 = rhoxr*(W1[:,i+1]-W1[:,i])+rhoxv*(W2[:,i+1]-W2[:,i])+np.sqrt(1.0-rhoxr**2-rhoxv**2)*(W3[:,i+1]-W3[:,i])
     X[:,i+1] = X[:,i]+(R[:,i]-0.5*V[:,i])*dt+np.sqrt(V[:,i])*term1
     time[i+1] = time[i]+dt
-    # Moment matching component, ensure that E(S(T)/M(T)) = S0 is a martingala
+    # Moment matching component, ensure that E(S(T)/M(T)) = S(t_0)/M(t_0) is a martingala
     a = S0 / np.mean(np.exp(X[:,i+1])/M_t[:,i+1])
     X[:,i+1] = X[:,i+1] + np.log(a)
 # Compute exponent
