@@ -1,10 +1,12 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+
 from config import *
-from CHF import ChFH1HWModel, CallPutCoefficients # characteristic function
+
+from HHW_CHF import ChFH1HWModel, CallPutCoefficients # characteristic function
 from HHW_AES import GeneratePathsHestonHW_AES     # almost exact simulation
-from HHW_MC import HHW_Euler                   # standard euler mode
+from HHW_MC import HHW_Euler                      # standard euler mode
 
 
 def OptionPriceFromMonteCarlo(CP,S,K,M):

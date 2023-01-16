@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.special as sp
 import scipy.integrate as integrate
+
 from config import OptionType
 
 # Exact expectation E(sqrt(V(t)))

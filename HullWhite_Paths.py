@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
+import numpy as np
 from matplotlib import pylab
 from pylab import *
 pylab.rcParams['figure.figsize'] = (13, 4)
+from tqdm import tqdm
 
 def HWEuler(N_Paths,N_Steps,T,P0T, lamb, eta):    
     dt = 0.0001    
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     for idx, etat in enumerate(tqdm(etaVec)):
         np.random.seed(1)
         Paths = HWEuler(N_Paths,N_Steps,T,P0T, lamb, etat)
-        legend.append(f'Eta={eta:.2f}')
+        legend.append(f'Eta={etat:.2f}')
         timeGrid = Paths["time"]
         R = Paths["R"]
         plt.plot(timeGrid, np.transpose(R), color=color[idx])   

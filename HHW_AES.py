@@ -1,8 +1,12 @@
-""" Heston Hull-White MonteCarlo Almost Exact simulation
+""" 
+Heston Hull-White MonteCarlo Almost Exact simulation
+
 """
+
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+
 from config import *
 
 def CIR_Sample(NPaths,kappa,gamma,vbar,s,t,v_s):
@@ -22,35 +26,22 @@ def GeneratePathsHestonHW_AES(NPaths,NSteps,P0T,T,S_0,kappa,gamma,rhoxr,rhoxv,vb
     ----------
     NoOfPaths : int
         Number of paths for the evolution of the SDE.
-
     NoOfSteps : int
         Number of time steps for every path.
-
     P0T : function
         Discounted bond curve.
-
     T : float
         Time until maturity for the options, in years.
-
     S_0 : float
         Price value of the underlaying for the SDE with GBM.
-
     kappa : float
-
     rhoxr : float
-
     rhoxv : float
-
     vbar : float
-
     v0 : float
-
     lambd : float
-
     eta : float
-
     gamma : float
-
 
     Returns
     -------
@@ -116,7 +107,7 @@ def GeneratePathsHestonHW_AES(NPaths,NSteps,P0T,T,S_0,kappa,gamma,rhoxr,rhoxv,vb
 
 if __name__ == "__main__":
 
-    from H1HW import OptionPriceFromMonteCarlo
+    from H1HW_main import OptionPriceFromMonteCarlo
 
     np.random.seed(1)
     pathsExact = GeneratePathsHestonHW_AES(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
@@ -128,7 +119,6 @@ if __name__ == "__main__":
     #==============================================================================
     plt.figure(1)
     plt.plot(K,valueOptMC_ex,'.k')
-    # plt.ylim([0.0,110.0])
     plt.legend(['AES'])
     plt.xlabel('Strike, K')
     plt.ylabel('EU Option Value')

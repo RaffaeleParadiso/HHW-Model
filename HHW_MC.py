@@ -1,12 +1,17 @@
-""" Heston Hull-White MonteCarlo Euler simulation
+""" 
+Heston Hull-White MonteCarlo Euler simulation
+
 """
+
 import sys
-from matplotlib import pylab
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
+
+from matplotlib import pylab
 from pylab import *
 pylab.rcParams['figure.figsize'] = (13, 4)
+
 from config import *
 
 def HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta):
@@ -103,7 +108,7 @@ def HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta):
 
 if __name__ == "__main__":
 
-    from H1HW import OptionPriceFromMonteCarlo
+    from H1HW_main import OptionPriceFromMonteCarlo
 
     FIGURE = True
     SAVE = False
@@ -123,7 +128,6 @@ if __name__ == "__main__":
     if FIGURE:
         plt.figure()
         plt.plot(K,valueOptMC)
-        # plt.ylim([0.0,110.0])
         plt.legend(['Euler'])
         plt.grid()
         plt.show()
