@@ -4,17 +4,10 @@ Heston Hull-White MonteCarlo Euler simulation
 """
 
 import sys
-import matplotlib.pyplot as plt
 import numpy as np
-import scipy.stats as st
 
-from matplotlib import pylab
-from pylab import *
-pylab.rcParams['figure.figsize'] = (13, 4)
 
-from config import *
-
-def HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta):
+def HHW_Euler(NPaths,NSteps,S0, set_params):
     """
     Generate Paths from Monte Carlo Euler discretization for the Heston Hull White model (HHW)
 
@@ -24,12 +17,12 @@ def HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta):
         Number of paths for the evolution of the SDE.
     NoOfSteps : int
         Number of time steps for every path.
-    P0T : function
-        Zero Coupon Bond curve with maturity T (obtained from the market).
+    S0 : float
+        Price value of the underlaying for the SDE with GBM.
     T : float
         Time until maturity for the options (years).
-    S_0 : float
-        Price value of the underlaying for the SDE with GBM.
+    P0T : function
+        Zero Coupon Bond curve with maturity T (obtained from the market).
     kappa : float
     rhoxr : float
     rhoxv : float
@@ -44,10 +37,10 @@ def HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta):
     paths : ndarray
         see dtype parameter above.
     """
-    np.random.seed(1)
+    P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta = set_params
     dt = 0.00001
     f_ZERO_T = lambda t: -(np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)  # forward rate
-    r0 = f_ZERO_T(0.00001) # Initial interest rate is the forward rate at time t -> 0.
+    r0 = f_ZERO_T(dt) # The initial interest rate is the forward rate at time t -> 0.
     theta = lambda t: 1.0/lambd*(f_ZERO_T(t+dt)-f_ZERO_T(t-dt))/(2.0*dt)+f_ZERO_T(t)+eta**2/(2.0*lambd**2)*(1.0-np.exp(-2.0*lambd*t))
 
     # Values from normal distribution with mean 0 and variance 1.
@@ -60,12 +53,12 @@ def HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta):
     W2 = np.zeros([NPaths, NSteps+1])
     W3 = np.zeros([NPaths, NSteps+1])
 
-    # Initial values
     V = np.zeros([NPaths, NSteps+1])
     X = np.zeros([NPaths, NSteps+1])
     R = np.zeros([NPaths, NSteps+1])
     M_t = np.ones([NPaths,NSteps+1])
 
+    # Initial values
     R[:,0]=r0 # initial interest rate
     V[:,0]=v0 # initial volatility
     X[:,0]=np.log(S0) # current stock price
@@ -73,7 +66,8 @@ def HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta):
     time = np.zeros([NSteps+1])
     dt = T/float(NSteps) # time steps (defined from the number of steps and the maturity time)
     for i in range(0,NSteps):
-        if NPaths > 1:     # Normal with mean 0 and variance 1 (standard normal distribution)
+        # Making sure that samples from a normal have mean 0 and variance 1 (Standardization)
+        if NPaths > 1:
             Z1[:,i] = (Z1[:,i]-np.mean(Z1[:,i]))/np.std(Z1[:,i])
             Z2[:,i] = (Z2[:,i]-np.mean(Z2[:,i]))/np.std(Z2[:,i])
             Z3[:,i] = (Z3[:,i]-np.mean(Z3[:,i]))/np.std(Z3[:,i])
@@ -108,20 +102,31 @@ def HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta):
 
 if __name__ == "__main__":
 
-    from H1HW_main import OptionPriceFromMonteCarlo
+    import matplotlib.pyplot as plt
+    from matplotlib import pylab
+    from pylab import *
+    pylab.rcParams['figure.figsize'] = (13, 4)
+    
+    from main import OptionPriceFromMonteCarlo
+    from config import *
 
     FIGURE = True
     SAVE = False
     DENSITY = False
 
-    paths = HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
+    np.random.seed(1)
+    
+    set_params = (P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
+
+    paths = HHW_Euler(NPaths,NSteps,S0,set_params)
+
     time_n = paths["time"]
     S_n = paths["S"]
     R_n = paths["R"]
     M_t_n = paths["M_t"]
     #==============================================================================
-    print(np.mean(S_n[:,1]/M_t_n[:,1]))
-    print(np.mean(S_n[:,-1]/M_t_n[:,-1]))
+    print(f"{np.mean(S_n[:,1]/M_t_n[:,1]):.2f}")
+    print(f"{np.mean(S_n[:,-1]/M_t_n[:,-1]):.2f}")
     #==============================================================================
     valueOptMC= OptionPriceFromMonteCarlo(CP,S_n[:,-1],K,M_t_n[:,-1])
     #==============================================================================
@@ -129,7 +134,10 @@ if __name__ == "__main__":
         plt.figure()
         plt.plot(K,valueOptMC)
         plt.legend(['Euler'])
+        plt.xlabel('Strike, K')
+        plt.ylabel('EU Option Value')
         plt.grid()
+        if SAVE: plt.savefig("MC.png",bbox_inches='tight')
         plt.show()
 
         plt.figure()
@@ -151,13 +159,14 @@ if __name__ == "__main__":
         plt.show()
 
     if SAVE:
-        np.savetxt("time_n.txt", time_n,  fmt='%.4f')
-        np.savetxt("S_n.txt", S_n,  fmt='%.4f')
-        np.savetxt("R_n.txt", R_n,  fmt='%.4f')
-        np.savetxt("M_t_n.txt", M_t_n,  fmt='%.4f')
+        np.savetxt("MC_time_n.txt", time_n,  fmt='%.4f')
+        np.savetxt("MC_S_n.txt", S_n,  fmt='%.4f')
+        np.savetxt("MC_R_n.txt", R_n,  fmt='%.4f')
+        np.savetxt("MC_M_t_n.txt", M_t_n,  fmt='%.4f')
 
 
     if DENSITY:
+        import scipy.stats as st
         # 3D graph for S(t) for paths versus density
         plt.figure()
         ax = plt.axes(projection='3d')

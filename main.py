@@ -5,14 +5,15 @@ import matplotlib.pyplot as plt
 from config import *
 
 from HHW_CHF import ChFH1HWModel, CallPutCoefficients # characteristic function
-from HHW_AES import GeneratePathsHestonHW_AES     # almost exact simulation
-from HHW_MC import HHW_Euler                      # standard euler mode
+from HHW_AES import GeneratePathsHestonHW_AES         # almost exact simulation
+from HHW_MC import HHW_Euler                          # standard euler mode
 
 
 def OptionPriceFromMonteCarlo(CP,S,K,M):
     """
+    S is a vector of Monte Carlo samples at T
     """
-    # S is a vector of Monte Carlo samples at T
+
     result = np.zeros([len(K),1])
     if CP == OptionType.CALL:
         for (idx,k) in enumerate(K):
@@ -57,8 +58,7 @@ def OptionPriceFromCOS(cf,CP,S0,tau,K,N,L,P0T):
     b = 0.0 + L * np.sqrt(tau) 
     # Summation from k = 0 to k=N-1
     k = np.linspace(0,N-1,N).reshape([N,1])  
-    u = k * np.pi / (b - a)  
-    # Determine coefficients for put prices  
+    u = k * np.pi / (b - a)   
     H_k = CallPutCoefficients(OptionType.PUT,a,b,k)   
     mat = np.exp(i * np.outer((x0 - a) , u))
     temp = cf(u) * H_k 
@@ -75,49 +75,55 @@ if __name__ == "__main__":
     EULER = True
     AES = True
     COS = True
+    
     FIGURE = True
 
+    SAVE = False
+
     if EULER:
+        set_params = (P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
         start = time.time()
         np.random.seed(1)
-        paths = HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
+        paths = HHW_Euler(NPaths,NSteps,S0, set_params)
         S_n = paths["S"]
         M_t_n = paths["M_t"]
-        # print(np.mean(S_n[:,-1]/M_t_n[:,-1]))
+        print(np.mean(S_n[:,-1]/M_t_n[:,-1]))
         valueOptMC= OptionPriceFromMonteCarlo(CP,S_n[:,-1],K,M_t_n[:,-1])
-        np.savetxt("MC.txt", valueOptMC, fmt='%.4f')
-        print(f"Time elapsed for Euler MC: {time.time() - start} for {len(K)} strikes")
+        if SAVE: np.savetxt("MC.txt", valueOptMC, fmt='%.4f')
+        print(f"Time elapsed for Euler MC: {(time.time() - start):.3f} seconds for {len(K)} strikes")
 
     if AES:
+        set_params = (P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
         start = time.time()
         np.random.seed(1)
-        pathsExact = GeneratePathsHestonHW_AES(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
+        pathsExact = GeneratePathsHestonHW_AES(NPaths,NSteps,S0,set_params)
         S_ex = pathsExact["S"]
         M_t_ex = pathsExact["M_t"]
-        # print(np.mean(S_ex[:,-1]/M_t_ex[:,-1]))
+        print(np.mean(S_ex[:,-1]/M_t_ex[:,-1]))
         valueOptMC_ex= OptionPriceFromMonteCarlo(CP,S_ex[:,-1],K,M_t_ex[:,-1])
-        np.savetxt("AES.txt", valueOptMC_ex, fmt='%.4f')
-        print(f"Time elapsed for AES MC: {time.time() - start} for {len(K)} strikes")
+        if SAVE: np.savetxt("AES.txt", valueOptMC_ex, fmt='%.4f')
+        print(f"Time elapsed for AES MC: {(time.time() - start):.3f} seconds for {len(K)} strikes")
 
     if COS:
+        set_params = (P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
         start = time.time()
-        cf2 = ChFH1HWModel(P0T,lambd,eta,T,kappa,gamma,vbar,v0,rhoxv, rhoxr)
+        cf2 = ChFH1HWModel(set_params)
         # u=np.array([1.0,2.0,3.0])
         # print(cf2(u))
         valCOS = OptionPriceFromCOS(cf2, CP, S0, T, K, N, L,P0T(T))
-        np.savetxt("COS.txt", valCOS, fmt='%.4f')
-        print(f"Time elapsed for COS Method: {time.time() - start} for {len(K)} strikes")
+        if SAVE: np.savetxt("COS.txt", valCOS, fmt='%.4f')
+        print(f"Time elapsed for COS Method: {(time.time() - start):.3f} seconds for {len(K)} strikes")
         
 
     if FIGURE:
-        plt.figure(1)
+        plt.figure()
         plt.plot(K,valueOptMC)
         plt.plot(K,valueOptMC_ex,'.k')
         plt.plot(K,valCOS,'--r')
-        # plt.ylim([0.0,110.0])
+        plt.ylim([0.0,60.0])
         plt.legend(['Euler','AES','COS'])
         plt.xlabel('Strike, K')
         plt.ylabel('EU Option Value')
         plt.grid()
-        # plt.savefig("img/MC_vs_AES_vs_COS.png",bbox_inches='tight')
+        if SAVE: plt.savefig("img/MC_vs_AES_vs_COS.png",bbox_inches='tight')
         plt.show()

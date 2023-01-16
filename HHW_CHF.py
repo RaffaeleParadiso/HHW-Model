@@ -4,8 +4,11 @@ import scipy.integrate as integrate
 
 from config import OptionType
 
-# Exact expectation E(sqrt(V(t)))
+
 def meanSqrtV_3(kappa,v0,vbar,gamma):
+    """
+    Exact expectation E(sqrt(V(t)))
+    """
     delta = 4.0 *kappa*vbar/gamma/gamma
     c = lambda t: 1.0/(4.0*kappa)*gamma*gamma*(1.0-np.exp(-kappa*(t)))
     kappaBar = lambda t: 4.0*kappa*v0*np.exp(-kappa*t)/(gamma*gamma*(1.0-np.exp(-kappa*t)))
@@ -13,11 +16,15 @@ def meanSqrtV_3(kappa,v0,vbar,gamma):
     return temp1
 
 def C_H1HW(u,tau,lambd):
+    """
+    """
     i = complex(0.0,1.0)
     C = (i*u - 1.0)/lambd * (1-np.exp(-lambd*tau))
     return C
 
 def D_H1HW(u,tau,kappa,gamma,rhoxv):
+    """
+    """
     i = complex(0.0,1.0)
     D1 = np.sqrt(np.power(kappa-gamma*rhoxv*i*u,2)+(u*u+i*u)*gamma*gamma)
     g  = (kappa-gamma*rhoxv*i*u-D1)/(kappa-gamma*rhoxv*i*u+D1)
@@ -26,6 +33,8 @@ def D_H1HW(u,tau,kappa,gamma,rhoxv):
     return D
     
 def A_H1HW(u,tau,P0T,lambd,eta,kappa,gamma,vbar,v0,rhoxv,rhoxr):
+    """
+    """
     i  = complex(0.0,1.0)
     D1 = np.sqrt(np.power(kappa-gamma*rhoxv*i*u,2)+(u*u+i*u)*gamma*gamma)
     g  = (kappa-gamma*rhoxv*i*u-D1)/(kappa-gamma*rhoxv*i*u+D1)   
@@ -47,7 +56,10 @@ def A_H1HW(u,tau,P0T,lambd,eta,kappa,gamma,vbar,v0,rhoxv,rhoxr):
     I_4       = -1.0/lambd * (i*u+u**2.0)*value2
     return I_1_adj + kappa*vbar*I_2 + 0.5*eta**2.0*I_3+eta*rhoxr*I_4
 
-def ChFH1HWModel(P0T,lambd,eta,tau,kappa,gamma,vbar,v0,rhoxv, rhoxr):
+def ChFH1HWModel(set_params):
+    """
+    """
+    P0T,tau,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta = set_params
     dt = 0.0001    
     f0T = lambda t: - (np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2.0*dt)
     r0 = f0T(0.00001)
@@ -57,6 +69,8 @@ def ChFH1HWModel(P0T,lambd,eta,tau,kappa,gamma,vbar,v0,rhoxv, rhoxr):
     return lambda u: np.exp(A(u) + C(u)*r0 + D(u)*v0)
 
 def Chi_Psi(a,b,c,d,k):
+    """
+    """
     psi = np.sin(k * np.pi * (d - a) / (b - a)) - np.sin(k * np.pi * (c - a)/(b - a))
     psi[1:] = psi[1:] * (b - a) / (k[1:] * np.pi)
     psi[0] = d - c 
@@ -70,8 +84,11 @@ def Chi_Psi(a,b,c,d,k):
     value = {"chi":chi,"psi":psi }
     return value
 
-# Determine coefficients for put prices 
+ 
 def CallPutCoefficients(CP,a,b,k):
+    """
+    Determine coefficients for put prices
+    """
     if CP==OptionType.CALL:                  
         c = 0.0
         d = b
