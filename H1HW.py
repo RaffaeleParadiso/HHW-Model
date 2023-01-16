@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from config import *
 from CHF import ChFH1HWModel, CallPutCoefficients # characteristic function
 from HHW_AES import GeneratePathsHestonHW_AES     # almost exact simulation
-from HHW_MC import GeneratePathsHestonHWEuler     # standard euler mode
+from HHW_MC import HHW_Euler                   # standard euler mode
 
 
 def OptionPriceFromMonteCarlo(CP,S,K,M):
@@ -70,15 +70,15 @@ def OptionPriceFromCOS(cf,CP,S0,tau,K,N,L,P0T):
 
 if __name__ == "__main__":
 
-    euler = 1
-    aes = 1
-    cos = 1
-    figure = 1
+    EULER = True
+    AES = True
+    COS = True
+    FIGURE = True
 
-    if euler:
+    if EULER:
         start = time.time()
         np.random.seed(1)
-        paths = GeneratePathsHestonHWEuler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
+        paths = HHW_Euler(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
         S_n = paths["S"]
         M_t_n = paths["M_t"]
         # print(np.mean(S_n[:,-1]/M_t_n[:,-1]))
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         np.savetxt("MC.txt", valueOptMC, fmt='%.4f')
         print(f"Time elapsed for Euler MC: {time.time() - start} for {len(K)} strikes")
 
-    if aes:
+    if AES:
         start = time.time()
         np.random.seed(1)
         pathsExact = GeneratePathsHestonHW_AES(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         np.savetxt("AES.txt", valueOptMC_ex, fmt='%.4f')
         print(f"Time elapsed for AES MC: {time.time() - start} for {len(K)} strikes")
 
-    if cos:
+    if COS:
         start = time.time()
         cf2 = ChFH1HWModel(P0T,lambd,eta,T,kappa,gamma,vbar,v0,rhoxv, rhoxr)
         # u=np.array([1.0,2.0,3.0])
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         print(f"Time elapsed for COS Method: {time.time() - start} for {len(K)} strikes")
         
 
-    if figure:
+    if FIGURE:
         plt.figure(1)
         plt.plot(K,valueOptMC)
         plt.plot(K,valueOptMC_ex,'.k')

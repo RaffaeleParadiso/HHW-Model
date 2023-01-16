@@ -5,17 +5,6 @@ class OptionType(enum.Enum):
     CALL = 1.0
     PUT = -1.0
 
-def OptionPriceFromMonteCarlo(CP,S,K,M):
-    # S is a vector of Monte Carlo samples at T
-    result = np.zeros([len(K),1])
-    if CP == OptionType.CALL:
-        for (idx,k) in enumerate(K):
-            result[idx] = np.mean(1.0/M*np.maximum(S-k,0.0))
-    elif CP == OptionType.PUT:
-        for (idx,k) in enumerate(K):
-            result[idx] = np.mean(1.0/M*np.maximum(k-S,0.0))
-    return result
-
 CP  = OptionType.CALL
 NPaths = 10000 # #of paths for MC Euler and AES
 NSteps = 500   # #of time steps for MC Euler and AES
@@ -24,7 +13,6 @@ eta    = 0.005 #
 S0     = 100.0 #
 T      = 1.5     # Time until maturity (years)
 r      = 0.07  # Initial interest rate
-
 
 # K = np.linspace(.01,2*S0*np.exp(r*T),50)
 K = np.arange(50,151,5)

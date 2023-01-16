@@ -116,6 +116,8 @@ def GeneratePathsHestonHW_AES(NPaths,NSteps,P0T,T,S_0,kappa,gamma,rhoxr,rhoxv,vb
 
 if __name__ == "__main__":
 
+    from H1HW import OptionPriceFromMonteCarlo
+
     np.random.seed(1)
     pathsExact = GeneratePathsHestonHW_AES(NPaths,NSteps,P0T,T,S0,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
     S_ex = pathsExact["S"]
@@ -126,7 +128,7 @@ if __name__ == "__main__":
     #==============================================================================
     plt.figure(1)
     plt.plot(K,valueOptMC_ex,'.k')
-    plt.ylim([0.0,110.0])
+    # plt.ylim([0.0,110.0])
     plt.legend(['AES'])
     plt.xlabel('Strike, K')
     plt.ylabel('EU Option Value')
