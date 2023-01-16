@@ -1,19 +1,20 @@
 """ Heston Hull-White MonteCarlo Euler simulation
 """
+import sys
 from matplotlib import pylab
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats as st
 from pylab import *
-from tqdm import tqdm
 pylab.rcParams['figure.figsize'] = (13, 4)
 from config import *
 
 def HHW_Euler(NPaths,NSteps,S0,v0,T,P0T,kappa,gamma,rhoxr,rhoxv,vbar,lambd,eta):
     np.random.seed(1)
     dt = 0.00001
-    f0T = lambda t: -(np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)  # forward rate
-    r0 = f0T(0.00001) # Initial interest rate is the forward rate at time t -> 0.
-    theta = lambda t: 1.0/lambd*(f0T(t+dt)-f0T(t-dt))/(2.0*dt)+f0T(t)+eta**2/(2.0*lambd**2)*(1.0-np.exp(-2.0*lambd*t))
+    f_ZERO_T = lambda t: -(np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)  # forward rate
+    r0 = f_ZERO_T(0.00001) # Initial interest rate is the forward rate at time t -> 0.
+    theta = lambda t: 1.0/lambd*(f_ZERO_T(t+dt)-f_ZERO_T(t-dt))/(2.0*dt)+f_ZERO_T(t)+eta**2/(2.0*lambd**2)*(1.0-np.exp(-2.0*lambd*t))
 
     # Values from normal distribution with mean 0 and variance 1.
     Z1 = np.random.normal(0.0,1.0,[NPaths,NSteps])
@@ -59,6 +60,8 @@ def HHW_Euler(NPaths,NSteps,S0,v0,T,P0T,kappa,gamma,rhoxr,rhoxv,vbar,lambd,eta):
         # Moment matching component, ensure that E(S(T)/M(T)) = S(t_0)/M(t_0) is a martingala
         a = S0 / np.mean(np.exp(X[:,i+1])/M_t[:,i+1])
         X[:,i+1] = X[:,i+1] + np.log(a)
+        sys.stderr.write("Time step Euler MC: {0}\r".format(i))
+    sys.stderr.write("\n")
     # Compute exponent
     S = np.exp(X)
     paths = {"time":time,"S":S,"R":R,"M_t":M_t}
@@ -68,6 +71,7 @@ if __name__ == "__main__":
 
     FIGURE = True
     SAVE = False
+    DENSITY = False
 
     paths = HHW_Euler(NPaths,NSteps,S0,v0,T,P0T,kappa,gamma,rhoxr,rhoxv,vbar,lambd,eta)
     time_n = paths["time"]
@@ -78,12 +82,12 @@ if __name__ == "__main__":
     print(np.mean(S_n[:,1]/M_t_n[:,1]))
     print(np.mean(S_n[:,-1]/M_t_n[:,-1]))
     #==============================================================================
-    valueOptMC= EUOptionPriceFromMCPathsGeneralizedStochIR(CP,S_n[:,-1],K,M_t_n[:,-1])
+    valueOptMC= OptionPriceFromMonteCarlo(CP,S_n[:,-1],K,M_t_n[:,-1])
     #==============================================================================
     if FIGURE:
-        plt.figure(0)
+        plt.figure()
         plt.plot(K,valueOptMC)
-        plt.ylim([0.0,110.0])
+        # plt.ylim([0.0,110.0])
         plt.legend(['Euler'])
         plt.grid()
         plt.show()
@@ -111,3 +115,51 @@ if __name__ == "__main__":
         np.savetxt("S_n.txt", S_n,  fmt='%.4f')
         np.savetxt("R_n.txt", R_n,  fmt='%.4f')
         np.savetxt("M_t_n.txt", M_t_n,  fmt='%.4f')
+
+
+    if DENSITY:
+        # 3D graph for X(t) for paths versus density
+        plt.figure()
+        ax = plt.axes(projection='3d')
+        zline = np.zeros([len(time_n),1])
+        # Plot paths
+        n = 40
+        for i in range(0,n,1):
+            y1 = np.squeeze(np.transpose(X[i,:]))
+            x1 = time_n
+            z1 = np.squeeze(zline)
+            ax.plot3D(x1, y1, z1, 'blue')
+        ax.view_init(50, -170)
+
+        # Plot densities for X(T)
+        Ti = np.linspace(0,T,500)
+        normPDF = lambda x,t :  st.norm.pdf(x, np.log(S0) + (r - 0.5 * eta * eta)*t, np.sqrt(t) * eta)
+        y1 = np.linspace(3,6,100)
+        for ti in Ti:
+            x1 = np.zeros([len(y1)]) + ti
+            z1 = normPDF(y1,ti)
+            ax.plot3D(x1, y1, z1, 'red')
+    # =============================================================================
+        # 3D graph for S(t) for paths versus density
+        plt.figure()
+        ax = plt.axes(projection='3d')
+        zline = np.zeros([len(time_n),1])
+        # Plot paths
+        n = 40
+        for i in range(0,n,1):
+            y1 = np.squeeze(np.transpose(S_n[i,:]))
+            x1 = time_n
+            z1 = np.squeeze(zline)
+            ax.plot3D(x1, y1, z1, 'blue')
+        ax.view_init(50, -170)
+
+        # Plot densities for X(T)
+        Ti = np.linspace(0,T,500)
+        # Note that in scipy the scale parameter needs to be in the exponent 
+        lognnormPDF = lambda x,t :  st.lognorm.pdf(x, scale = np.exp(np.log(S0) + (r - 0.5 * eta * eta)*t), s= np.sqrt(t) * eta)
+        y1 = np.linspace(0,200,100)
+        for ti in Ti:
+            x1 = np.zeros([len(y1)]) + ti
+            z1 = lognnormPDF(y1,ti)
+            ax.plot3D(x1, y1, z1, 'red')
+        plt.show()
