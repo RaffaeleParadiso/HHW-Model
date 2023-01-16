@@ -93,7 +93,7 @@ def HHW_Euler(NPaths,NSteps,S0, set_params):
         # Moment matching component, ensure that E(S(T)/M(T)) = S(t_0)/M(t_0) is a martingala
         a = S0 / np.mean(np.exp(X[:,i+1])/M_t[:,i+1])
         X[:,i+1] = X[:,i+1] + np.log(a)
-        sys.stderr.write("Time step Euler MC: {0}\r".format(i))
+        sys.stderr.write("Time step Euler MC         : {0}\r".format(i))
     sys.stderr.write("\n")
     # Compute exponent
     S = np.exp(X)

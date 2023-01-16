@@ -11,9 +11,9 @@ def CIR_Sample(NPaths,kappa,gamma,vbar,s,t,v_s):
     """
     """
     delta = 4.0 *kappa*vbar/gamma/gamma
-    c= 1.0/(4.0*kappa)*gamma*gamma*(1.0-np.exp(-kappa*(t-s)))
+    c = 1.0/(4.0*kappa)*gamma*gamma*(1.0-np.exp(-kappa*(t-s)))
     kappaBar = 4.0*kappa*v_s*np.exp(-kappa*(t-s))/(gamma*gamma*(1.0-np.exp(-kappa*(t-s))))
-    sample = c* np.random.noncentral_chisquare(delta,kappaBar,NPaths)
+    sample = c * np.random.noncentral_chisquare(delta,kappaBar,NPaths)
     return  sample
 
 def GeneratePathsHestonHW_AES(NPaths,NSteps,S0,set_params):
@@ -103,7 +103,7 @@ def GeneratePathsHestonHW_AES(NPaths,NSteps,S0,set_params):
         # Moment matching component, ensure that E(S(T)/M(T)) = S(t_0)/M(t_0) is a martingala
         a = S0 / np.mean(np.exp(X[:,i+1])/M_t[:,i+1])
         X[:,i+1] = X[:,i+1] + np.log(a)
-        sys.stderr.write("Time step AES : {0}\r".format(i))
+        sys.stderr.write("Time step AES              : {0}\r".format(i))
     sys.stderr.write("\n")
     # Compute exponent
     S = np.exp(X)

@@ -1,9 +1,7 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-
 from config import *
-
 from HHW_CHF import ChFH1HWModel, CallPutCoefficients # characteristic function
 from HHW_AES import GeneratePathsHestonHW_AES         # almost exact simulation
 from HHW_MC import HHW_Euler                          # standard euler mode
@@ -13,7 +11,6 @@ def OptionPriceFromMonteCarlo(CP,S,K,M):
     """
     S is a vector of Monte Carlo samples at T
     """
-
     result = np.zeros([len(K),1])
     if CP == OptionType.CALL:
         for (idx,k) in enumerate(K):
@@ -77,8 +74,9 @@ if __name__ == "__main__":
     COS = True
     
     FIGURE = True
-
     SAVE = False
+    
+    print("="*60)
 
     if EULER:
         set_params = (P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
@@ -87,10 +85,11 @@ if __name__ == "__main__":
         paths = HHW_Euler(NPaths,NSteps,S0, set_params)
         S_n = paths["S"]
         M_t_n = paths["M_t"]
-        print(np.mean(S_n[:,-1]/M_t_n[:,-1]))
         valueOptMC= OptionPriceFromMonteCarlo(CP,S_n[:,-1],K,M_t_n[:,-1])
         if SAVE: np.savetxt("MC.txt", valueOptMC, fmt='%.4f')
-        print(f"Time elapsed for Euler MC: {(time.time() - start):.3f} seconds for {len(K)} strikes")
+        print(f"Time elapsed for Euler MC  : {(time.time() - start):.3f} seconds for {len(K)} strikes")
+        print(f"Price MC_Euler Martingala  : {(np.mean(S_n[:,-1]/M_t_n[:,-1])):.2f}")
+        print("="*60)
 
     if AES:
         set_params = (P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
@@ -99,10 +98,11 @@ if __name__ == "__main__":
         pathsExact = GeneratePathsHestonHW_AES(NPaths,NSteps,S0,set_params)
         S_ex = pathsExact["S"]
         M_t_ex = pathsExact["M_t"]
-        print(np.mean(S_ex[:,-1]/M_t_ex[:,-1]))
         valueOptMC_ex= OptionPriceFromMonteCarlo(CP,S_ex[:,-1],K,M_t_ex[:,-1])
         if SAVE: np.savetxt("AES.txt", valueOptMC_ex, fmt='%.4f')
-        print(f"Time elapsed for AES MC: {(time.time() - start):.3f} seconds for {len(K)} strikes")
+        print(f"Time elapsed for AES MC    : {(time.time() - start):.3f} seconds for {len(K)} strikes")
+        print(f"Price MC_AES Martingala    : {(np.mean(S_ex[:,-1]/M_t_ex[:,-1])):.2f}")
+        print("="*60)
 
     if COS:
         set_params = (P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         valCOS = OptionPriceFromCOS(cf2, CP, S0, T, K, N, L,P0T(T))
         if SAVE: np.savetxt("COS.txt", valCOS, fmt='%.4f')
         print(f"Time elapsed for COS Method: {(time.time() - start):.3f} seconds for {len(K)} strikes")
-        
+        print("="*60)
 
     if FIGURE:
         plt.figure()
@@ -125,5 +125,5 @@ if __name__ == "__main__":
         plt.xlabel('Strike, K')
         plt.ylabel('EU Option Value')
         plt.grid()
-        if SAVE: plt.savefig("img/MC_vs_AES_vs_COS.png",bbox_inches='tight')
+        if SAVE: plt.savefig("MC_vs_AES_vs_COS.png",bbox_inches='tight')
         plt.show()

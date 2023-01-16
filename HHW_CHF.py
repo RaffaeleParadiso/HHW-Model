@@ -1,3 +1,8 @@
+"""
+Characterist function for the Heston-Hull-White Model, obtain from the Riccati System of Equations
+
+"""
+
 import numpy as np
 import scipy.special as sp
 import scipy.integrate as integrate

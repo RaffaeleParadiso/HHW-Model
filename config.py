@@ -7,7 +7,7 @@ class OptionType(enum.Enum):
 
 CP  = OptionType.CALL
 NPaths = 10000 # #of paths for MC Euler and AES
-NSteps = 500   # #of time steps for MC Euler and AES
+NSteps = 501   # #of time steps for MC Euler and AES
 lambd  = 0.05  #
 eta    = 0.005 #
 S0     = 100.0 #
