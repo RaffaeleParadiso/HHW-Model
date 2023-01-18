@@ -40,7 +40,7 @@ def HHW_Euler(NPaths,NSteps,S0, set_params):
     P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta = set_params
     dt = 0.00001
     f_ZERO_T = lambda t: -(np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)  # forward rate
-    r0 = f_ZERO_T(dt) # The initial interest rate is the forward rate at time t -> 0.
+    r0 = f_ZERO_T(0.00001) # The initial interest rate is the forward rate at time t -> 0.
     theta = lambda t: 1.0/lambd*(f_ZERO_T(t+dt)-f_ZERO_T(t-dt))/(2.0*dt)+f_ZERO_T(t)+eta**2/(2.0*lambd**2)*(1.0-np.exp(-2.0*lambd*t))
 
     # Values from normal distribution with mean 0 and variance 1.

@@ -22,6 +22,7 @@ def meanSqrtV_3(kappa,v0,vbar,gamma):
 
 def C_H1HW(u,tau,lambd):
     """
+    Solution of the ODE system for the HHW 
     """
     i = complex(0.0,1.0)
     C = (i*u - 1.0)/lambd * (1-np.exp(-lambd*tau))
@@ -29,6 +30,7 @@ def C_H1HW(u,tau,lambd):
 
 def D_H1HW(u,tau,kappa,gamma,rhoxv):
     """
+    Solution of the ODE system for the HHW 
     """
     i = complex(0.0,1.0)
     D1 = np.sqrt(np.power(kappa-gamma*rhoxv*i*u,2)+(u*u+i*u)*gamma*gamma)
@@ -39,6 +41,7 @@ def D_H1HW(u,tau,kappa,gamma,rhoxv):
     
 def A_H1HW(u,tau,P0T,lambd,eta,kappa,gamma,vbar,v0,rhoxv,rhoxr):
     """
+    Solution of the ODE system for the HHW 
     """
     i  = complex(0.0,1.0)
     D1 = np.sqrt(np.power(kappa-gamma*rhoxv*i*u,2)+(u*u+i*u)*gamma*gamma)
@@ -63,7 +66,9 @@ def A_H1HW(u,tau,P0T,lambd,eta,kappa,gamma,vbar,v0,rhoxv,rhoxr):
 
 def ChFH1HWModel(set_params):
     """
+    Characteristic function for the H1-HW model
     """
+    i = complex(0.0,1.0)
     P0T,tau,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta = set_params
     dt = 0.0001    
     f0T = lambda t: - (np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2.0*dt)
