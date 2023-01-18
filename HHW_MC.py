@@ -95,8 +95,7 @@ def HHW_Euler(NPaths,NSteps,S0, set_params):
         X[:,i+1] = X[:,i+1] + np.log(a)
         sys.stderr.write("Time step Euler MC         : {0}\r".format(i))
     sys.stderr.write("\n")
-    # Compute exponent
-    S = np.exp(X)
+    S = np.exp(X)     # Compute exponent
     paths = {"time":time,"S":S,"R":R,"M_t":M_t}
     return paths
 
