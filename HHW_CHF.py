@@ -1,5 +1,6 @@
 """
 Characterist function for the Heston-Hull-White Model, obtain from the Riccati System of Equations
+and coefficient chi e psi for the call/put price
 
 """
 
@@ -66,7 +67,7 @@ def A_H1HW(u,tau,P0T,lambd,eta,kappa,gamma,vbar,v0,rhoxv,rhoxr):
 
 def ChFH1HWModel(set_params):
     """
-    Characteristic function for the H1-HW model
+    Characteristic function for the H1-HW model without the B(u).
     """
     i = complex(0.0,1.0)
     P0T,tau,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta = set_params
@@ -80,16 +81,17 @@ def ChFH1HWModel(set_params):
 
 def Chi_Psi(a,b,c,d,k):
     """
+    Return the values for psi and chi for e^x and 1 on [c,d] \in [a,b]
     """
     psi = np.sin(k * np.pi * (d - a) / (b - a)) - np.sin(k * np.pi * (c - a)/(b - a))
     psi[1:] = psi[1:] * (b - a) / (k[1:] * np.pi)
     psi[0] = d - c 
-    chi = 1.0 / (1.0 + np.power((k * np.pi / (b - a)) , 2.0)) 
+    chi = 1.0 / (1.0 + (k * np.pi / (b - a))**2.0)
     expr1 = np.cos(k * np.pi * (d - a)/(b - a)) * np.exp(d)  - np.cos(k * np.pi 
                   * (c - a) / (b - a)) * np.exp(c)
-    expr2 = k * np.pi / (b - a) * np.sin(k * np.pi * 
-                        (d - a) / (b - a))   - k * np.pi / (b - a) * np.sin(k 
-                        * np.pi * (c - a) / (b - a)) * np.exp(c)
+    expr2 = (k * np.pi / (b - a)) * (np.sin(k * np.pi * 
+                        (d - a) / (b - a)) - np.sin(k 
+                        * np.pi * (c - a) / (b - a)) * np.exp(c))
     chi = chi * (expr1 + expr2)  
     value = {"chi":chi,"psi":psi }
     return value
@@ -97,12 +99,12 @@ def Chi_Psi(a,b,c,d,k):
  
 def CallPutCoefficients(CP,a,b,k):
     """
-    Determine coefficients for put prices
+    Determine coefficients chi and psi for call/put prices
     """
     if CP==OptionType.CALL:                  
         c = 0.0
         d = b
-        coef = Chi_Psi(a,b,c,d,k)
+        coef  = Chi_Psi(a,b,c,d,k)
         Chi_k = coef["chi"]
         Psi_k = coef["psi"]
         if a < b and b < 0.0:
@@ -115,5 +117,5 @@ def CallPutCoefficients(CP,a,b,k):
         coef = Chi_Psi(a,b,c,d,k)
         Chi_k = coef["chi"]
         Psi_k = coef["psi"]
-        H_k      = 2.0 / (b - a) * (- Chi_k + Psi_k)               
+        H_k   = 2.0 / (b - a) * (- Chi_k + Psi_k)               
     return H_k
