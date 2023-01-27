@@ -1,5 +1,5 @@
 """ 
-Heston Hull-White MonteCarlo Almost Exact simulation
+Heston Hull-White MonteCarlo Almost Exact simulation (AES)
 
 """
 
@@ -19,6 +19,7 @@ def CIR_Sample(NPaths,kappa,gamma,vbar,s,t,v_s):
 def GeneratePathsHestonHW_AES(NPaths,NSteps,S0,set_params):
     """
     Generate Paths from Monte Carlo Euler discretization for the Heston Hull White model (HHW)
+    where the sampling for the variance process is done with the CIR_Sample function.
 
     Parameters
     ----------
@@ -40,6 +41,7 @@ def GeneratePathsHestonHW_AES(NPaths,NSteps,S0,set_params):
     lambd : float
     eta : float
     gamma : float
+    :math:`E=mc^2`
 
     Returns
     -------
@@ -92,10 +94,10 @@ def GeneratePathsHestonHW_AES(NPaths,NSteps,S0,set_params):
         # Exact samples for the variance process
         V[:,i+1] = CIR_Sample(NPaths,kappa,gamma,vbar,0,dt,V[:,i])
         
-        k0 = -rhoxv /gamma * kappa*vbar*dt
+        k0 = -rhoxv/gamma*kappa*vbar*dt
         k2 = rhoxv/gamma
-        k1 = kappa*k2 -0.5
-        k3 = np.sqrt(1.0-rhoxr*rhoxr - rhoxv*rhoxv)
+        k1 = kappa*k2 - 0.5
+        k3 = np.sqrt(1.0-rhoxr**2 - rhoxv**2)
         
         X[:,i+1] = X[:,i] + k0 + (k1*dt - k2)*V[:,i] + R[:,i]*dt + k2*V[:,i+1] + np.sqrt(V[:,i]*dt)*(rhoxr*Z1[:,i] + k3 * Z3[:,i])
         time[i+1] = time[i] + dt

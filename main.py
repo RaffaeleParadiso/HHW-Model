@@ -25,27 +25,27 @@ def OptionPriceFromCOS(cf,CP,S0,tau,K,N,L,P0T):
     Calculate the price for the list of strikes provided with the COS method.
     Parameters
     ----------
-    cf :    
+    cf : lambda function
         Characteristic function.
-    CP :
-        C for call and P for put.
-    S0 : 
+    CP : class option type
+        CALL for call and PUT for put.
+    S0 : float
         Initial stock price.
-    tau :  
+    tau : float
         Time to maturity.
-    K :    
-        List of strikes.
-    N :    
+    K : ndarray of float
+        Array of strikes.
+    N : int
         Number of expansion terms.
-    L :    
+    L : int
         Size of truncation domain (L=8 or L=10).
-    P0T : 
+    P0T : lambda function
         Zero-coupon bond for maturity T.
 
     Returns
     -------
-    value : ndarray
-        see dtype parameter above.
+    value : ndarray of float
+        Array of prices.
     """
     if K is not np.array: K = np.array(K).reshape([len(K),1])   
     i = complex(0.0,1.0) 
