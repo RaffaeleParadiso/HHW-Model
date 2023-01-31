@@ -47,23 +47,23 @@ def OptionPriceFromCOS(cf,CP,S0,tau,K,N,L,P0T):
     value : ndarray of float
         Array of prices.
     """
-    if K is not np.array: K = np.array(K).reshape([len(K),1])   
-    i = complex(0.0,1.0) 
-    x0 = np.log(S0 / K)   
+    if K is not np.array: K = np.array(K).reshape([len(K),1])
+    i = complex(0.0,1.0)
+    x0 = np.log(S0 / K)
     # Truncation domain
-    a = 0.0 - L * np.sqrt(tau)
-    b = 0.0 + L * np.sqrt(tau) 
+    a = - L * np.sqrt(tau)
+    b = + L * np.sqrt(tau)
     # Summation from k = 0 to k=N-1
-    k = np.linspace(0,N-1,N).reshape([N,1])  
-    u = k * np.pi / (b - a)   
-    H_k = CallPutCoefficients(OptionType.PUT,a,b,k)   
+    k = np.linspace(0,N-1,N).reshape([N,1])
+    u = k * np.pi / (b - a)
+    H_k = CallPutCoefficients(OptionType.PUT,a,b,k)
     mat = np.exp(i * np.outer((x0 - a) , u))
-    temp = cf(u) * H_k 
-    temp[0] = 0.5 * temp[0]    
-    value = K * np.real(mat.dot(temp))     
-    # We use the put-call parity for call options
+    temp = cf(u) * H_k
+    temp[0] = 0.5 * temp[0]
+    value = K * np.real(mat.dot(temp))
     if CP == OptionType.CALL:
-        value = value + S0 - K * P0T   
+        # Put-call parity for call options
+        value = value + S0 - K * P0T
     return value
 
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         plt.plot(K,valueOptMC)
         plt.plot(K,valueOptMC_ex,'.k')
         plt.plot(K,valCOS,'--r')
-        plt.ylim([0.0,60.0])
+        # plt.ylim([0.0,60.0])
         plt.legend(['Euler','AES','COS'])
         plt.xlabel('Strike, K')
         plt.ylabel('EU Option Value')

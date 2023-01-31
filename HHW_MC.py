@@ -39,7 +39,7 @@ def HHW_Euler(NPaths,NSteps,S0, set_params):
     """
     P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta = set_params
     dt = 0.00001
-    f_ZERO_T = lambda t: -(np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)  # forward rate
+    f_ZERO_T = lambda t: -(np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)  # instantaneus forward rate
     r0 = f_ZERO_T(0.00001) # The initial interest rate is the forward rate at time t -> 0.
     theta = lambda t: 1.0/lambd*(f_ZERO_T(t+dt)-f_ZERO_T(t-dt))/(2.0*dt)+f_ZERO_T(t)+eta**2/(2.0*lambd**2)*(1.0-np.exp(-2.0*lambd*t))
 
@@ -73,9 +73,9 @@ def HHW_Euler(NPaths,NSteps,S0, set_params):
             Z3[:,i] = (Z3[:,i]-np.mean(Z3[:,i]))/np.std(Z3[:,i])
 
         # Wiener process evolution
-        W1[:,i+1] = W1[:,i]+np.power(dt,0.5)*Z1[:,i]
-        W2[:,i+1] = W2[:,i]+np.power(dt,0.5)*Z2[:,i]
-        W3[:,i+1] = W3[:,i]+np.power(dt,0.5)*Z3[:,i]
+        W1[:,i+1] = W1[:,i]+(dt**0.5)*Z1[:,i]
+        W2[:,i+1] = W2[:,i]+(dt**0.5)*Z2[:,i]
+        W3[:,i+1] = W3[:,i]+(dt**0.5)*Z3[:,i]
 
         # Truncated boundary condition
         R[:,i+1] = R[:,i]+lambd*(theta(time[i])-R[:,i])*dt+eta*(W1[:,i+1]-W1[:,i])
@@ -83,7 +83,7 @@ def HHW_Euler(NPaths,NSteps,S0, set_params):
         M_t[:,i+1] = M_t[:,i]*np.exp(0.5*(R[:,i+1]+R[:,i])*dt)
 
         V[:,i+1] = V[:,i]+kappa*(vbar-V[:,i])*dt+gamma*np.sqrt(V[:,i])*(W2[:,i+1]-W2[:,i])
-        V[:,i+1] = np.maximum(V[:,i+1],0.0)
+        V[:,i+1] = np.maximum(V[:,i+1],0.0) # Truncated Euler scheme for CIR process
 
         term1 = rhoxr*(W1[:,i+1]-W1[:,i])+rhoxv*(W2[:,i+1]-W2[:,i])+np.sqrt(1.0-rhoxr**2-rhoxv**2)*(W3[:,i+1]-W3[:,i])
         
@@ -162,7 +162,6 @@ if __name__ == "__main__":
         np.savetxt("MC_S_n.txt", S_n,  fmt='%.4f')
         np.savetxt("MC_R_n.txt", R_n,  fmt='%.4f')
         np.savetxt("MC_M_t_n.txt", M_t_n,  fmt='%.4f')
-
 
     if DENSITY:
         import scipy.stats as st

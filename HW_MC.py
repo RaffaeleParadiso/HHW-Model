@@ -11,30 +11,20 @@ def HWEuler(NPaths,NSteps,T,P0T, lambd, eta):
     f_ZERO_T = lambda t: - (np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)
     r0 = f_ZERO_T(0.00001) # Initial interest rate is forward rate at time t->0
     theta = lambda t: 1.0/lambd * (f_ZERO_T(t+dt)-f_ZERO_T(t-dt))/(2.0*dt) + f_ZERO_T(t) + eta*eta/(2.0*lambd*lambd)*(1.0-np.exp(-2.0*lambd*t))      
-    
     # Values from normal distribution with mean 0 and variance 1.
     Z = np.random.normal(0.0,1.0,[NPaths,NSteps])
-    
-    # Wiener process for R(t)
-    W = np.zeros([NPaths, NSteps+1])
-    
+    W = np.zeros([NPaths, NSteps+1]) # Wiener process for R(t)
     R = np.zeros([NPaths, NSteps+1])
-    
-    # Initial values
     R[:,0] = r0 # initial interest rate
-
     time = np.zeros([NSteps+1]) 
     dt = T / float(NSteps)
     for i in tqdm(range(0,NSteps)):
-        # Making sure that samples from a normal have mean 0 and variance 1 (Standardization)
+        # Samples from a normal distr. with mean 0 and variance 1 (Standardization)
         if NPaths > 1:
             Z[:,i] = (Z[:,i] - np.mean(Z[:,i])) / np.std(Z[:,i])
-
-        W[:,i+1] = W[:,i] + np.power(dt, 0.5)*Z[:,i]
-
+        W[:,i+1] = W[:,i] + (dt**0.5)*Z[:,i]
         R[:,i+1] = R[:,i] + lambd*(theta(time[i]) - R[:,i]) * dt + eta* (W[:,i+1]-W[:,i])
         time[i+1] = time[i] + dt
-
     paths = {"time":time,"R":R}
     return paths
 
@@ -44,7 +34,6 @@ if __name__ == "__main__":
     from matplotlib import pylab
     from pylab import *
     pylab.rcParams['figure.figsize'] = (13, 4)
-
 
     SAVE = False
     NPaths = 1
