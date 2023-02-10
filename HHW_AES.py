@@ -81,7 +81,6 @@ def GeneratePathsHestonHW_AES(NPaths,NSteps,S0,set_params):
     W1 = np.zeros([NPaths, NSteps+1])
     W2 = np.zeros([NPaths, NSteps+1])
     W3 = np.zeros([NPaths, NSteps+1])
-    
 
     V = np.zeros([NPaths, NSteps+1])
     X = np.zeros([NPaths, NSteps+1])

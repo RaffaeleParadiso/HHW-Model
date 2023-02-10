@@ -11,13 +11,13 @@ NPaths = 10000 # n° of paths for MC Euler and AES
 NSteps = 1001   # n° of time steps for MC Euler and AES
 lambd  = 0.05  # 
 eta    = 0.005 #
-S0     = 100.0 #
+S0     = 100.0 # Initial stock price
 T      = 1.5   # Time until maturity (years)
 r      = 0.07  # Initial interest rate
 
 # K = np.linspace(.01,2*S0*np.exp(r*T),50)
-K = np.arange(80,131,1)
-K = np.array(K).reshape([len(K),1]) # Strikes prices (array of)
+K = np.arange(80,131,1) # OTM/ATM/ITM/OTM options
+K = np.array(K).reshape([len(K),1]) # Array of strike prices
 
 P0T = lambda T: np.exp(-r*T)  # ZCB curve with maturity T (obtained from the market)
 
