@@ -2,9 +2,9 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from config import *
-from HHW_CHF import ChFH1HWModel, CallPutCoefficients # characteristic function
-from HHW_AES import GeneratePathsHestonHW_AES         # almost exact simulation
-from HHW_MC import HHW_Euler                          # standard euler mode
+from utils.HHW_CHF import ChFH1HWModel, Chi_Psi      # characteristic function
+from utils.HHW_AES import GeneratePathsHestonHW_AES  # almost exact simulation
+from utils.HHW_MC import HHW_Euler                   # standard euler mode
 
 
 def OptionPriceFromMonteCarlo(CP,S,K,M):
@@ -19,6 +19,29 @@ def OptionPriceFromMonteCarlo(CP,S,K,M):
         for (idx,k) in enumerate(K):
             result[idx] = np.mean(1.0/M*np.maximum(k-S,0.0))
     return result
+
+def CallPutCoefficients(CP,a,b,k):
+    """
+    Determine coefficients chi and psi for call/put prices
+    """
+    if CP==OptionType.CALL:                  
+        c = 0.0
+        d = b
+        coef  = Chi_Psi(a,b,c,d,k)
+        Chi_k = coef["chi"]
+        Psi_k = coef["psi"]
+        if a < b and b < 0.0:
+            H_k = np.zeros([len(k),1])
+        else:
+            H_k = 2.0 / (b - a) * (Chi_k - Psi_k)  
+    elif CP==OptionType.PUT:
+        c = a
+        d = 0.0
+        coef = Chi_Psi(a,b,c,d,k)
+        Chi_k = coef["chi"]
+        Psi_k = coef["psi"]
+        H_k   = 2.0 / (b - a) * (- Chi_k + Psi_k)               
+    return H_k
 
 def OptionPriceFromCOS(cf,CP,S0,tau,K,N,L,P0T):
     """

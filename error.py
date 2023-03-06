@@ -2,13 +2,12 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from config import *
-from HHW_CHF import ChFH1HWModel                      # characteristic function
-from HHW_CHF import CallPutCoefficients               # characteristic function
-from HHW_AES import GeneratePathsHestonHW_AES         # almost exact simulation
-from HHW_MC import HHW_Euler                          # standard euler mode
+from utils.HHW_CHF import ChFH1HWModel                # characteristic function
+from utils.HHW_AES import GeneratePathsHestonHW_AES         # almost exact simulation
+from utils.HHW_MC import HHW_Euler                          # standard euler mode
 from main import OptionPriceFromMonteCarlo
 from main import OptionPriceFromCOS
-
+from main import CallPutCoefficients                  # characteristic function
 
 np.random.seed(1)
 set_params = (P0T,T,kappa,gamma,rhoxr,rhoxv,vbar,v0,lambd,eta)
@@ -16,7 +15,6 @@ Nstepss = [101, 201, 301, 401, 501]
 value_euler = []
 value_AES = []
 for NStepss in Nstepss:
-    
     paths = HHW_Euler(NPaths,NStepss,S0, set_params)
     S_n = paths["S"]
     M_t_n = paths["M_t"]

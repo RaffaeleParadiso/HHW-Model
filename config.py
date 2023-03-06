@@ -8,7 +8,7 @@ class OptionType(enum.Enum):
 CP  = OptionType.CALL
 
 NPaths = 10000 # n° of paths for MC Euler and AES
-NSteps = 1001   # n° of time steps for MC Euler and AES
+NSteps = 1001  # n° of time steps for MC Euler and AES
 lambd  = 0.05  # 
 eta    = 0.005 #
 S0     = 100.0 # Initial stock price

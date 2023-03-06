@@ -8,8 +8,6 @@ import numpy as np
 import scipy.special as sp
 import scipy.integrate as integrate
 
-from config import OptionType
-
 
 def meanSqrtV_3(k,v0,vbar,gamma):
     """
@@ -93,26 +91,3 @@ def Chi_Psi(a,b,c,d,k):
     chi = chi * (expr1 + expr2)  
     value = {"chi":chi,"psi":psi }
     return value
-
-def CallPutCoefficients(CP,a,b,k):
-    """
-    Determine coefficients chi and psi for call/put prices
-    """
-    if CP==OptionType.CALL:                  
-        c = 0.0
-        d = b
-        coef  = Chi_Psi(a,b,c,d,k)
-        Chi_k = coef["chi"]
-        Psi_k = coef["psi"]
-        if a < b and b < 0.0:
-            H_k = np.zeros([len(k),1])
-        else:
-            H_k = 2.0 / (b - a) * (Chi_k - Psi_k)  
-    elif CP==OptionType.PUT:
-        c = a
-        d = 0.0
-        coef = Chi_Psi(a,b,c,d,k)
-        Chi_k = coef["chi"]
-        Psi_k = coef["psi"]
-        H_k   = 2.0 / (b - a) * (- Chi_k + Psi_k)               
-    return H_k
