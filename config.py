@@ -16,17 +16,17 @@ T      = 1.5   # Time until maturity (years)
 r      = 0.07  # Initial interest rate
 
 # K = np.linspace(.01,2*S0*np.exp(r*T),50)
-K = np.arange(80,131,1) # OTM/ATM/ITM/OTM options
+K = np.arange(80,131,1) # OTM/ATM/ITM options
 K = np.array(K).reshape([len(K),1]) # Array of strike prices
 
-P0T = lambda T: np.exp(-r*T)  # ZCB curve with maturity T (obtained from the market)
+P0T = lambda T: np.exp(-r*T)  # ZCB curve with maturity T (usually obtained from the market)
 
-gamma  =  0.0571
-vbar   =  0.0398
-v0     =  0.0175
-rhoxr  =  0.2
-rhoxv  = -0.5711
-kappa  =  1.5768
+gamma  =  0.0571    
+vbar   =  0.0398    # long-run mean value for the volatility process
+v0     =  0.0175    # initial volatility value
+rhoxr  =  0.2       # correlation between log stocks and interest rate
+rhoxv  = -0.5711    # correlation between log stocks and volatility
+kappa  =  1.5768    # mean reversion rate velocity for the volatility process 
 
 # Settings for the COS method
 N      = 150000 # n° of contribute (N terms) in the cosine expansion for the characteristic function

@@ -11,11 +11,10 @@ def HWEuler(NPaths,NSteps,T,P0T, lambd, eta):
     f_ZERO_T = lambda t: - (np.log(P0T(t+dt))-np.log(P0T(t-dt)))/(2*dt)
     r0 = f_ZERO_T(0.00001) # Initial interest rate is forward rate at time t->0
     theta = lambda t: 1.0/lambd * (f_ZERO_T(t+dt)-f_ZERO_T(t-dt))/(2.0*dt) + f_ZERO_T(t) + eta*eta/(2.0*lambd*lambd)*(1.0-np.exp(-2.0*lambd*t))      
-    # Values from normal distribution with mean 0 and variance 1.
     Z = np.random.normal(0.0,1.0,[NPaths,NSteps])
     W = np.zeros([NPaths, NSteps+1]) # Wiener process for R(t)
     R = np.zeros([NPaths, NSteps+1])
-    R[:,0] = r0 # initial interest rate
+    R[:,0] = r0                      # Initial interest rate
     time = np.zeros([NSteps+1]) 
     dt = T / float(NSteps)
     for i in tqdm(range(0,NSteps)):
