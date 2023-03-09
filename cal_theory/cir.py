@@ -3,6 +3,7 @@ Expectation of the square root of the CIR process
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from regex import D
 
 def CIREuler(NPaths,NSteps,T,kappa,v0,vbar,gamma):
     """
@@ -51,14 +52,14 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from matplotlib import pylab
     from pylab import *
-    pylab.rcParams['figure.figsize'] = (13, 4)
+    pylab.rcParams['figure.figsize'] = (7, 4)
 
     NPaths = 10000
     NSteps = 2000
-    T      = 100.0
+    T      = 10.0
     time2   = np.linspace(0,T,10)
 
-    SAVE = 0
+    SAVE = 1
 
     # Feller Condition 2* kappa * vbar > gamma^2
     Parameters1 ={"kappa":1.2,"gamma":0.1,"v0":0.04,"vbar":0.03} # yep
@@ -79,9 +80,11 @@ if __name__ == "__main__":
     plt.plot(time2,approx2(time2),'.k', label=f"Second Approx")
     plt.xlabel('time')
     plt.ylabel(r'$\mathbb{E}[\sqrt{v_t}]$', size=15)
+    text = rf"$\mathbb{{E}}[\sqrt{{v_t}}]$ with parameters: $\kappa = {kappa}$, $\gamma = {gamma}$, $v_0 = {v0}$, $\bar{{v}} = {vbar}$"
+    plt.title(text)
     plt.legend()
     plt.grid()
-    if SAVE: plt.savefig("HullWhitelambda.png",bbox_inches='tight')
+    if SAVE: plt.savefig("Feller_hold.png",bbox_inches='tight')
     plt.show()
 
     plt.figure()
@@ -99,7 +102,9 @@ if __name__ == "__main__":
     plt.plot(time2,approx2(time2),'.k', label=f"Second Approx")
     plt.xlabel('time')
     plt.ylabel(r'$\mathbb{E}[\sqrt{v_t}]$', size=15)
+    text = rf"$\mathbb{{E}}[\sqrt{{v_t}}]$ with parameters: $\kappa = {kappa}$, $\gamma = {gamma}$, $v_0 = {v0}$, $\bar{{v}} = {vbar}$"
+    plt.title(text)
     plt.legend()
     plt.grid()
-    if SAVE: plt.savefig("HullWhitelambda.png",bbox_inches='tight')
+    if SAVE: plt.savefig("Feller_not_hold.png",bbox_inches='tight')
     plt.show()
