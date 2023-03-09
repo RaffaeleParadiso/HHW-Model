@@ -59,7 +59,7 @@ if __name__ == "__main__":
     T      = 10.0
     time2   = np.linspace(0,T,10)
 
-    SAVE = 1
+    SAVE = 0
 
     # Feller Condition 2* kappa * vbar > gamma^2
     Parameters1 ={"kappa":1.2,"gamma":0.1,"v0":0.04,"vbar":0.03} # yep

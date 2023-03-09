@@ -34,12 +34,12 @@ if __name__ == "__main__":
     from pylab import *
     pylab.rcParams['figure.figsize'] = (13, 4)
 
-    SAVE = False
+    SAVE = 1
     NPaths = 1
     NSteps = 20000
     T      = 5.0
     lambd  = 0.5
-    eta    = 0.01
+    eta    = 0.05
     P0T    = lambda T: np.exp(-0.05*T)
 
     plt.figure() 
@@ -50,12 +50,12 @@ if __name__ == "__main__":
         np.random.seed(1)
         print(f"eta = {lambdl}")
         Paths = HWEuler(NPaths,NSteps,T,P0T, lambdl, eta)
-        legend.append(f'lambdda={lambdl:.2f}')
+        legend.append(rf'${{\lambda}}$={lambdl:.2f}')
         timeGrid = Paths["time"]
         R = Paths["R"]
         plt.plot(timeGrid, np.transpose(R), color=color[idx])   
     plt.grid()
-    plt.title(rf"Effect of mean reversion lambda $\lambda$")
+    plt.title(rf"Effect of mean reversion lambda ${{\lambda}}$ with ${{\eta}} = $ {eta}")
     plt.xlabel("time")
     plt.ylabel("R(t)")
     plt.legend(legend)
@@ -66,14 +66,14 @@ if __name__ == "__main__":
     etaVec = [0.1, 0.2, 0.3]
     for idx, etat in enumerate(etaVec):
         np.random.seed(1)
-        print(f"eta = {etat}")
+        print(f"sigma = {etat}")
         Paths = HWEuler(NPaths,NSteps,T,P0T, lambd, etat)
-        legend.append(f'Eta={etat:.2f}')
+        legend.append(rf'${{\sigma}}$={etat:.2f}')
         timeGrid = Paths["time"]
         R = Paths["R"]
         plt.plot(timeGrid, np.transpose(R), color=color[idx])   
     plt.grid()
-    plt.title(rf"Effect of the Volatility $\eta$")
+    plt.title(rf"Effect of the Volatility with ${{\sigma}} = $ {lambd}")
     plt.xlabel("time")
     plt.ylabel("R(t)")
     plt.legend(legend, loc='upper left')

@@ -23,7 +23,7 @@ if __name__ == "__main__":
     from pylab import *
     pylab.rcParams['figure.figsize'] = (6.5, 4)
 
-    SAVE = 1
+    SAVE = 0
     i = complex(0.0, 1.0)
     a = -10
     b = 10
