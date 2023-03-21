@@ -14,6 +14,7 @@ def HWEuler(NPaths,NSteps,T,P0T, lambd, eta):
     Z = np.random.normal(0.0,1.0,[NPaths,NSteps])
     W = np.zeros([NPaths, NSteps+1]) # Wiener process for R(t)
     R = np.zeros([NPaths, NSteps+1])
+    print(r0)
     R[:,0] = r0                      # Initial interest rate
     time = np.zeros([NSteps+1]) 
     dt = T / float(NSteps)
@@ -39,12 +40,12 @@ if __name__ == "__main__":
     NSteps = 20000
     T      = 5.0
     lambd  = 0.5
-    eta    = 0.05
+    eta    = 0.1
     P0T    = lambda T: np.exp(-0.05*T)
 
     plt.figure() 
     legend = []
-    lambdVec = [-0.2, 0.2, 5.0]
+    lambdVec = [-0.2, 0.5, 5.0]
     color = ["blue", "red", "green"]
     for idx,lambdl in enumerate(lambdVec):    
         np.random.seed(1)
@@ -55,7 +56,7 @@ if __name__ == "__main__":
         R = Paths["R"]
         plt.plot(timeGrid, np.transpose(R), color=color[idx])   
     plt.grid()
-    plt.title(rf"Effect of mean reversion lambda ${{\lambda}}$ with ${{\eta}} = $ {eta}")
+    plt.title(rf"Effect of mean reversion with ${{\sigma}} = $ {eta} and ${{r_0}} = 0.5$")
     plt.xlabel("time")
     plt.ylabel("R(t)")
     plt.legend(legend)
@@ -73,7 +74,7 @@ if __name__ == "__main__":
         R = Paths["R"]
         plt.plot(timeGrid, np.transpose(R), color=color[idx])   
     plt.grid()
-    plt.title(rf"Effect of the Volatility with ${{\sigma}} = $ {lambd}")
+    plt.title(rf"Effect of the Volatility with ${{\lambda}} = $ {lambd} and ${{r_0}} = 0.5$")
     plt.xlabel("time")
     plt.ylabel("R(t)")
     plt.legend(legend, loc='upper left')

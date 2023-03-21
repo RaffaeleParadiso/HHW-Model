@@ -23,7 +23,7 @@ if __name__ == "__main__":
     from pylab import *
     pylab.rcParams['figure.figsize'] = (6.5, 4)
 
-    SAVE = 0
+    SAVE = 1
     i = complex(0.0, 1.0)
     a = -10
     b = 10
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         error = np.max(np.abs(f_Y-ff))
         error_list0.append([n,error])
         print("For {0} expansion terms the error is {1}".format(n,error))
-        plt.plot(y,f_Y, label=f"{n}")
+        plt.plot(y,f_Y, label=f"N = {n}")
     plt.plot(y,dist.pdf(y),'x',markersize=2, label="Exact")
     plt.legend()#["N=%.0f"%i for i in N])
     plt.title(rf"Log Normal Density recover with ${{\mu}}={mu}$ and ${{\sigma}} = {sigma}$")
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         error = np.max(np.abs(f_X-f_XExact))
         error_list.append([n,error])
         print("For {0} expansion terms the error is {1}".format(n,error))
-        plt.plot(x,f_X, label=f"{n}")
+        plt.plot(x,f_X, label=f"N = {n}")
     plt.plot(x, f_XExact, 'x',markersize=2, label="Exact")
     plt.legend()
     plt.title(rf"Normal Density recover with ${{\mu}}={mu}$ and ${{\sigma}} = {sigma}$")

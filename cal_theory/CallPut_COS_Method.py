@@ -15,7 +15,6 @@ def CallPutOptionPriceCOSMthd(cf,CP,S0,r,tau,K,N,L):
     # K    - list of strikes
     # N    - Number of expansion terms
     # L    - size of truncation domain (typ.:L=8 or L=10)  
-
     K = np.array(K).reshape([len(K),1])
     i = complex(0.0,1.0) 
     x0 = np.log(S0 / K)   
@@ -58,7 +57,6 @@ def Chi_Psi(a,b,c,d,k):
     psi = np.sin(k * np.pi * (d - a) / (b - a)) - np.sin(k * np.pi * (c - a)/(b - a))
     psi[1:] = psi[1:] * (b - a) / (k[1:] * np.pi)
     psi[0] = d - c
-    
     chi = 1.0 / (1.0 + np.power((k * np.pi / (b - a)) , 2.0)) 
     expr1 = np.cos(k * np.pi * (d - a)/(b - a)) * np.exp(d)  - np.cos(k * np.pi 
                   * (c - a) / (b - a)) * np.exp(c)
@@ -66,16 +64,12 @@ def Chi_Psi(a,b,c,d,k):
                         (d - a) / (b - a))   - k * np.pi / (b - a) * np.sin(k 
                         * np.pi * (c - a) / (b - a)) * np.exp(c)
     chi = chi * (expr1 + expr2)
-    
-    value = {"chi":chi,"psi":psi }
-    return value
-    
+    return {"chi":chi,"psi":psi }    
 
 def BS_Call_Option_Price(CP,S_0,K,sigma,tau,r):
-    #Black-Scholes Call option price
     cp = str(CP).lower()
     K = np.array(K).reshape([len(K),1])
-    d1    = (np.log(S_0 / K) + (r + 0.5 * np.power(sigma,2.0)) 
+    d1    = (np.log(S_0 / K) + (r + 0.5 * sigma**2) 
     * tau) / float(sigma * np.sqrt(tau))
     d2    = d1 - sigma * np.sqrt(tau)
     if cp == "c" or cp == "1":
@@ -84,13 +78,14 @@ def BS_Call_Option_Price(CP,S_0,K,sigma,tau,r):
         value = st.norm.cdf(-d2) * K * np.exp(-r * tau) - st.norm.cdf(-d1)*S_0
     return value
 
-def mainCalculation():
+if __name__ == "__main__":
+
     i = complex(0.0,1.0)
     
     CP = "c"
     S0 = 100.0
     r = 0.1
-    tau = 0.1
+    tau = 10
     sigma = 0.25
     K = [80.0, 90.0, 100.0, 110, 120.0]
     N = 4*32
@@ -102,10 +97,9 @@ def mainCalculation():
     # is included internally in the evaluation
     # In the book we denote this function as \varphi(u)
 
-    cf = lambda u: np.exp((r - 0.5 * np.power(sigma,2.0)) * i * u * tau - 0.5 
-                          * np.power(sigma, 2.0) * np.power(u, 2.0) * tau)
+    cf = lambda u: np.exp((r - 0.5 * sigma**2) * i * u * tau - 0.5 
+                          * sigma**2 * u**2 * tau)
     
-    # Timing results 
     NoOfIterations = 100
     time_start = time.time() 
     for k in range(0,NoOfIterations,1):
@@ -115,7 +109,7 @@ def mainCalculation():
     
     # evaluate analytical Black Scholes equation
     val_Exact = BS_Call_Option_Price(CP,S0,K,sigma,tau,r)
-    plt.plot(K,val_COS)
+    # plt.plot(K,val_COS)
     plt.plot(K,val_Exact,'--')
     plt.xlabel("strike, K")
     plt.ylabel("Option Price")
@@ -128,5 +122,3 @@ def mainCalculation():
     for i in range(0,len(K)):
         error.append(np.abs(val_COS[i]-val_Exact[i])[0])
         print("Abs error for strike {0} is equal to {1:.2E}".format(K[i],error[i]))
-        
-mainCalculation()
