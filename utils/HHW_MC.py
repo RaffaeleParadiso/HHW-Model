@@ -99,6 +99,20 @@ def HHW_Euler(NPaths,NSteps,S0, set_params):
     paths = {"time":time,"S":S,"R":R,"M_t":M_t}
     return paths
 
+def OptionPriceFromMonteCarlo(CP,S,K,M):
+    """
+    S is a vector of Monte Carlo samples at T
+    """
+    result = np.zeros([len(K),1])
+    if CP == OptionType.CALL:
+        for (idx,k) in enumerate(K):
+            result[idx] = np.mean(1.0/M*np.maximum(S-k,0.0))
+    elif CP == OptionType.PUT:
+        for (idx,k) in enumerate(K):
+            result[idx] = np.mean(1.0/M*np.maximum(k-S,0.0))
+    return result
+
+
 if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
@@ -106,7 +120,6 @@ if __name__ == "__main__":
     from pylab import *
     pylab.rcParams['figure.figsize'] = (13, 4)
     
-    from main import OptionPriceFromMonteCarlo
     from config import *
 
     FIGURE = True

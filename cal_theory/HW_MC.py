@@ -56,7 +56,7 @@ if __name__ == "__main__":
         R = Paths["R"]
         plt.plot(timeGrid, np.transpose(R), color=color[idx])   
     plt.grid()
-    plt.title(rf"Effect of mean reversion with ${{\sigma}} = $ {eta} and ${{r_0}} = 0.5$")
+    plt.title(rf"Effect of mean reversion with ${{\eta}} = $ {eta} and ${{r_0}} = 0.5$")
     plt.xlabel("time")
     plt.ylabel("R(t)")
     plt.legend(legend)
@@ -67,9 +67,9 @@ if __name__ == "__main__":
     etaVec = [0.1, 0.2, 0.3]
     for idx, etat in enumerate(etaVec):
         np.random.seed(1)
-        print(f"sigma = {etat}")
+        print(f"eta = {etat}")
         Paths = HWEuler(NPaths,NSteps,T,P0T, lambd, etat)
-        legend.append(rf'${{\sigma}}$={etat:.2f}')
+        legend.append(rf'${{\eta}}$={etat:.2f}')
         timeGrid = Paths["time"]
         R = Paths["R"]
         plt.plot(timeGrid, np.transpose(R), color=color[idx])   

@@ -1,7 +1,10 @@
 import time
-import numpy as np
+
 import matplotlib.pyplot as plt
-from config import *
+import numpy as np
+import scipy.stats as st
+
+from utils.config import *
 from utils.HHW_CHF import ChFH1HWModel, Chi_Psi      # characteristic function
 from utils.HHW_AES import GeneratePathsHestonHW_AES  # almost exact simulation
 from utils.HHW_MC import HHW_Euler                   # standard euler mode
@@ -89,6 +92,18 @@ def OptionPriceFromCOS(cf,CP,S0,tau,K,N,L,P0T):
         value = value + S0 - K * P0T
     return value
 
+def BS(CP ,S_0 : float ,K,sigma,t,T,r) -> float:
+    """
+    """
+    K = np.array(K).reshape([len(K),1])
+    d1    = (np.log(S_0 / K) + (r + 0.5 * np.power(sigma,2.0)) 
+    * (T-t)) / (sigma * np.sqrt(T-t))
+    d2    = d1 - sigma * np.sqrt(T-t)
+    if CP == OptionType.CALL:
+        value = st.norm.cdf(d1) * S_0 - st.norm.cdf(d2) * K * np.exp(-r * (T-t))
+    elif CP == OptionType.PUT:
+        value = st.norm.cdf(-d2) * K * np.exp(-r * (T-t)) - st.norm.cdf(-d1)*S_0
+    return value
 
 if __name__ == "__main__":
 
@@ -138,13 +153,17 @@ if __name__ == "__main__":
         print(f"Time elapsed for COS Method: {(time.time() - start):.3f} seconds for {len(K)} strikes")
         print("="*60)
 
+
+    value_BS = BS(CP,S0,K,0.05,0,T,r)
+
     if FIGURE:
         plt.figure()
         plt.plot(K,valueOptMC)
         plt.plot(K,valueOptMC_ex,'.k')
         plt.plot(K,valCOS,'--r')
+        plt.plot(K,value_BS, '--g')
         # plt.ylim([0.0,60.0])
-        plt.legend(['Euler','AES','COS'])
+        plt.legend(['Euler','AES','COS', 'Black Scholes'])
         plt.xlabel('Strike, K')
         plt.ylabel('EU Option Value')
         plt.grid()
