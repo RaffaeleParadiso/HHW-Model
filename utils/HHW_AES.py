@@ -134,10 +134,10 @@ def OptionPriceFromMonteCarlo(CP,S,K,M):
     result = np.zeros([len(K),1])
     if CP == OptionType.CALL:
         for (idx,k) in enumerate(K):
-            result[idx] = np.mean(1.0/M*np.maximum(S-k,0.0))
+            result[idx] = np.mean((1.0/M)*np.maximum(S-k,0.0))
     elif CP == OptionType.PUT:
         for (idx,k) in enumerate(K):
-            result[idx] = np.mean(1.0/M*np.maximum(k-S,0.0))
+            result[idx] = np.mean((1.0/M)*np.maximum(k-S,0.0))
     return result
 
 

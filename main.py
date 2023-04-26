@@ -108,7 +108,7 @@ def BS(CP ,S_0 : float ,K,sigma,t,T,r) -> float:
 if __name__ == "__main__":
 
     EULER = True
-    AES = True
+    AES = False
     COS = True
     
     FIGURE = True
@@ -159,13 +159,13 @@ if __name__ == "__main__":
     if FIGURE:
         plt.figure()
         plt.plot(K,valueOptMC)
-        plt.plot(K,valueOptMC_ex,'.k')
+        # plt.plot(K,valueOptMC_ex,'.k')
         plt.plot(K,valCOS,'--r')
         plt.plot(K,value_BS, '--g')
         # plt.ylim([0.0,60.0])
-        plt.legend(['Euler','AES','COS', 'Black Scholes'])
+        plt.legend(['HHW - Euler','HHW - COS', 'Black Scholes'])
         plt.xlabel('Strike, K')
-        plt.ylabel('EU Option Value')
+        plt.ylabel('Option Value')
         plt.grid()
         if SAVE: plt.savefig("MC_vs_AES_vs_COS.png",bbox_inches='tight')
         plt.show()
