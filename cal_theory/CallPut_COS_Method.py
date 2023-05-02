@@ -32,12 +32,10 @@ def CallPutOptionPriceCOSMthd(cf, CP, S0, r, tau, K, N, L):
     return value
 
 
-""" 
-Determine coefficients for Put Prices 
-"""
-
-
 def CallPutCoefficients(CP, a, b, k):
+    """
+    Determine coefficients for Put Prices
+    """
     if str(CP).lower() == "c" or str(CP).lower() == "1":
         c = 0.0
         d = b
