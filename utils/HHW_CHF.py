@@ -1,6 +1,6 @@
 """
 Characterist function for the Heston-Hull-White Model, obtain from the Riccati System of Equations
-and coefficient chi e psi for the call/put price
+and coefficients chi e psi for the call/put price
 
 """
 
@@ -72,9 +72,12 @@ def A_H1HW(u, tau, P0T, lambd, eta, k, gamma, vbar, v0, rhoxv, rhoxr):
     )
     N = 10000  # Integration within the function I_1 and I_4
     z = np.linspace(0, tau - 1e-10, N)
-    f1 = (1.0 - np.exp(-lambd * z)) * theta(tau - z)
+
+    # I_1_adj with time-dependent theta {C(u,\tau)*\theta}
+    f1 = (1.0 - np.exp(-lambd * z)) * theta(tau - z) 
     value1 = integrate.trapezoid(f1, z)
-    I_1_adj = (i * u - 1.0) * value1  # I_1_adj with time-dependent theta
+    I_1_adj = (i * u - 1.0) * value1  
+    
     I_2 = tau / (gamma**2.0) * (k - gamma * rhoxv * i * u - D1) - 2.0 / (
         gamma**2.0
     ) * np.log((1.0 - g * np.exp(-D1 * tau)) / (1.0 - g))

@@ -3,6 +3,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
+from scipy.stats import norm
 
 from utils.config import *
 from utils.HHW_AES import GeneratePathsHestonHW_AES  # almost exact simulation
@@ -96,28 +97,54 @@ def OptionPriceFromCOS(cf, CP, S0, tau, K, N, L, P0T):
     return value
 
 
-def BS(CP, S_0: float, K, sigma, t, T, r) -> float:
-    """ """
-    K = np.array(K).reshape([len(K), 1])
+def BS(CP, S_0: float, K: float, sigma: float, t, T: float, r: float) -> float:
+    """ Black-Scholes formula for European options
+    Parameters
+    ----------
+    CP : class option type
+        CALL for call and PUT for put.
+    S_0 : float
+        Initial stock price.
+    K : ndarray of float
+        Array of strikes.
+    sigma : float
+        volatility of the stock price
+    t : float
+        time
+    T : float
+        time to maturity
+    r : float
+        risk-free rate of interest (constant)
+
+    Returns
+    -------
+    value : ndarray of float
+        Array of prices.
+    """
+    if K is np.array:
+        K = np.array(K).reshape([len(K), 1])
     d1 = (np.log(S_0 / K) + (r + 0.5 * np.power(sigma, 2.0)) * (T - t)) / (
         sigma * np.sqrt(T - t)
     )
     d2 = d1 - sigma * np.sqrt(T - t)
     if CP == OptionType.CALL:
-        value = st.norm.cdf(d1) * S_0 - st.norm.cdf(d2) * K * np.exp(-r * (T - t))
+        value = st.norm.cdf(d1) * S_0 - st.norm.cdf(d2) * \
+            K * np.exp(-r * (T - t))
     elif CP == OptionType.PUT:
-        value = st.norm.cdf(-d2) * K * np.exp(-r * (T - t)) - st.norm.cdf(-d1) * S_0
+        value = st.norm.cdf(-d2) * K * np.exp(-r * (T - t)
+                                              ) - st.norm.cdf(-d1) * S_0
     return value
 
 
 if __name__ == "__main__":
-    EULER = True
-    AES = False
-    COS = True
-    BLACK = True
+    EULER = 1
+    AES = 0
+    COS = 1
+    BLACK = 1
 
-    FIGURE = True
-    SAVE = False
+    FIGURE = 1
+    SAVE = 1
+    DIFF = 0
 
     print("=" * 60)
 
@@ -130,11 +157,12 @@ if __name__ == "__main__":
         M_t_n = paths["M_t"]
         valueOptMC = OptionPriceFromMonteCarlo(CP, S_n[:, -1], K, M_t_n[:, -1])
         if SAVE:
-            np.savetxt("MC.txt", valueOptMC, fmt="%.4f")
+            np.savetxt(f"raw_data/MC_{T}_{CP}.txt", valueOptMC, fmt="%.4f")
         print(
             f"Time elapsed for Euler MC  : {(time.time() - start):.3f} seconds for {len(K)} strikes"
         )
-        print(f"Price MC_Euler Martingala  : {(np.mean(S_n[:,-1]/M_t_n[:,-1])):.2f}")
+        print(
+            f"Price MC_Euler Martingala  : {(np.mean(S_n[:,-1]/M_t_n[:,-1])):.2f}")
         print("=" * 60)
 
     if AES:
@@ -144,13 +172,15 @@ if __name__ == "__main__":
         pathsExact = GeneratePathsHestonHW_AES(NPaths, NSteps, S0, set_params)
         S_ex = pathsExact["S"]
         M_t_ex = pathsExact["M_t"]
-        valueOptMC_ex = OptionPriceFromMonteCarlo(CP, S_ex[:, -1], K, M_t_ex[:, -1])
+        valueOptMC_ex = OptionPriceFromMonteCarlo(
+            CP, S_ex[:, -1], K, M_t_ex[:, -1])
         if SAVE:
             np.savetxt("AES.txt", valueOptMC_ex, fmt="%.4f")
         print(
             f"Time elapsed for AES MC    : {(time.time() - start):.3f} seconds for {len(K)} strikes"
         )
-        print(f"Price MC_AES Martingala    : {(np.mean(S_ex[:,-1]/M_t_ex[:,-1])):.2f}")
+        print(
+            f"Price MC_AES Martingala    : {(np.mean(S_ex[:,-1]/M_t_ex[:,-1])):.2f}")
         print("=" * 60)
 
     if COS:
@@ -161,7 +191,7 @@ if __name__ == "__main__":
         # print(cf2(u))
         valCOS = OptionPriceFromCOS(cf2, CP, S0, T, K, N, L, P0T(T))
         if SAVE:
-            np.savetxt("COS.txt", valCOS, fmt="%.4f")
+            np.savetxt(f"raw_data/COS_{T}_{CP}.txt", valCOS, fmt="%.4f")
         print(
             f"Time elapsed for COS Method: {(time.time() - start):.3f} seconds for {len(K)} strikes"
         )
@@ -185,5 +215,41 @@ if __name__ == "__main__":
         plt.ylabel("Option Value")
         plt.grid()
         if SAVE:
-            plt.savefig("HHW_short_maturity_25y.png", bbox_inches="tight")
-        plt.show()
+            plt.savefig(f"figure/HHW_{T}y_{CP}.png", bbox_inches="tight")
+        if DIFF:
+            value = []
+            for i in range(len(S_n)):
+                value.append(OptionPriceFromMonteCarlo(
+                    CP, S_n[:, i], K, M_t_n[:, i]))
+            print(len(value))
+            print(value)
+            plt.figure()
+            plt.plot(K, valCOS-value)
+
+    plt.figure()
+    K = 100
+    r = 0.1
+    T = 1
+    sigma = 0.3
+    N = norm.cdf
+
+    def BS_CALL(S, K, T, r, sigma):
+        d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))
+        d2 = d1 - sigma * np.sqrt(T)
+        return S * N(d1) - K * np.exp(-r*T) * N(d2)
+
+    def BS_PUT(S, K, T, r, sigma):
+        d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))
+        d2 = d1 - sigma * np.sqrt(T)
+        return K*np.exp(-r*T)*N(-d2) - S*N(-d1)
+    
+    S = np.arange(60, 140, 0.1)
+
+    calls = [BS(OptionType.CALL, s, K, sigma, 0, T, r) for s in S]
+    puts = [BS(OptionType.PUT, s, K, sigma, 0, T, r) for s in S]
+    plt.plot(S, calls, label='Call Value')
+    plt.plot(S, puts, label='Put Value')
+    plt.xlabel('$S_0$')
+    plt.ylabel(' Value')
+    plt.legend()
+    plt.show()
