@@ -86,9 +86,9 @@ def OptionPriceFromCOS(cf, CP, S0, tau, K, N, L, P0T):
     # Summation from k = 0 to k=N-1
     k = np.linspace(0, N - 1, N).reshape([N, 1])
     u = k * np.pi / (b - a)
-    H_k = CallPutCoefficients(OptionType.PUT, a, b, k)
+    U_k = CallPutCoefficients(OptionType.PUT, a, b, k)
     mat = np.exp(i * np.outer((x0 - a), u))
-    temp = cf(u) * H_k
+    temp = cf(u) * U_k
     temp[0] = 0.5 * temp[0]
     value = K * np.real(mat.dot(temp))
     if CP == OptionType.CALL:
@@ -108,7 +108,7 @@ def BS(CP, S_0: float, K: float, sigma: float, t, T: float, r: float) -> float:
     K : ndarray of float
         Array of strikes.
     sigma : float
-        volatility of the stock price
+        volatility of the stock price (constant)
     t : float
         time
     T : float
@@ -123,7 +123,7 @@ def BS(CP, S_0: float, K: float, sigma: float, t, T: float, r: float) -> float:
     """
     if K is np.array:
         K = np.array(K).reshape([len(K), 1])
-    d1 = (np.log(S_0 / K) + (r + 0.5 * np.power(sigma, 2.0)) * (T - t)) / (
+    d1 = (np.log(S_0 / K) + (r + 0.5 * sigma**2.0) * (T - t)) / (
         sigma * np.sqrt(T - t)
     )
     d2 = d1 - sigma * np.sqrt(T - t)
@@ -144,7 +144,6 @@ if __name__ == "__main__":
 
     FIGURE = 1
     SAVE = 1
-    DIFF = 0
 
     print("=" * 60)
 
@@ -198,10 +197,11 @@ if __name__ == "__main__":
         print("=" * 60)
 
     if BLACK:
-        value_BS = BS(CP, S0, K, 0.05, 0, T, r)
+        value_BS = BS(CP, S0, K, v0, 0, T, r)
 
     if FIGURE:
         plt.figure()
+        plt.title(f"Option Price vs Strike Price for T={T} years", fontsize=10)
         if EULER:
             plt.plot(K, valueOptMC, label="HHW - Euler")
         if AES:
@@ -209,47 +209,110 @@ if __name__ == "__main__":
         if COS:
             plt.plot(K, valCOS, "--r", label="HHW - COS")
         if BLACK:
-            plt.plot(K, value_BS, "--g", label="Black Scholes")
+            plt.plot(K, value_BS, "--g", label="Black-Scholes")
         plt.legend()
-        plt.xlabel("Strike, K")
+        plt.xlabel("Strike K")
         plt.ylabel("Option Value")
         plt.grid()
         if SAVE:
             plt.savefig(f"figure/HHW_{T}y_{CP}.png", bbox_inches="tight")
-        if DIFF:
-            value = []
-            for i in range(len(S_n)):
-                value.append(OptionPriceFromMonteCarlo(
-                    CP, S_n[:, i], K, M_t_n[:, i]))
-            print(len(value))
-            print(value)
-            plt.figure()
-            plt.plot(K, valCOS-value)
+        plt.show()
 
-    plt.figure()
-    K = 100
-    r = 0.1
-    T = 1
-    sigma = 0.3
-    N = norm.cdf
+    nx = 0
+    if nx:
+        K = 100
+        r = 0.1
+        T = 1
+        sigma = 0.3
+        N = norm.cdf
 
-    def BS_CALL(S, K, T, r, sigma):
-        d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))
-        d2 = d1 - sigma * np.sqrt(T)
-        return S * N(d1) - K * np.exp(-r*T) * N(d2)
+        def BS_CALL(S, K, T, r, sigma):
+            d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))
+            d2 = d1 - sigma * np.sqrt(T)
+            return S * N(d1) - K * np.exp(-r*T) * N(d2)
 
-    def BS_PUT(S, K, T, r, sigma):
-        d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))
-        d2 = d1 - sigma * np.sqrt(T)
-        return K*np.exp(-r*T)*N(-d2) - S*N(-d1)
-    
-    S = np.arange(60, 140, 0.1)
+        def BS_PUT(S, K, T, r, sigma):
+            d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))
+            d2 = d1 - sigma * np.sqrt(T)
+            return K*np.exp(-r*T)*N(-d2) - S*N(-d1)
 
-    calls = [BS(OptionType.CALL, s, K, sigma, 0, T, r) for s in S]
-    puts = [BS(OptionType.PUT, s, K, sigma, 0, T, r) for s in S]
-    plt.plot(S, calls, label='Call Value')
-    plt.plot(S, puts, label='Put Value')
-    plt.xlabel('$S_0$')
-    plt.ylabel(' Value')
-    plt.legend()
-    plt.show()
+        S = np.arange(60, 140, 5)
+
+        calls = [BS(OptionType.CALL, s, K, sigma, 0, T, r) for s in S]
+        puts = [BS(OptionType.PUT, s, K, sigma, 0, T, r) for s in S]
+        plt.figure()
+        plt.plot(S, calls, label='Call Value')
+        plt.plot(S, puts, label='Put Value')
+        plt.xlabel('$S_0$')
+        plt.ylabel(' Value')
+        plt.legend()
+        plt.show()
+
+        variyng_S = []
+        for element in S:
+            set_params = (P0T, T, kappa, gamma, rhoxr, rhoxv, vbar, v0, lambd, eta)
+            np.random.seed(1)
+            paths = HHW_Euler(NPaths, NSteps, element, set_params)
+            S_n = paths["S"]
+            M_t_n = paths["M_t"]
+            variyng_S.append(OptionPriceFromMonteCarlo(
+                CP, S_n[:, -1], [100], M_t_n[:, -1]))
+
+        variyng_S = np.array(variyng_S).reshape(len(S))
+
+        def long_put(S, K, Price):
+            # Long Put Payoff = max(Strike Price - Stock Price, 0)     # If we are long a call, we would only elect to call if the current stock price is less than     # the strike price on our option
+            P = list(map(lambda x: max(K - x, 0) - Price, S))
+            return P
+
+        T4 = long_put(S, 100, 0)
+        plt.figure()
+        plt.plot(S, puts, label='Puts Value BS')
+        plt.plot(S, variyng_S, label='Puts Value HHW')
+        plt.plot(S, T4, label='Payoff')
+        plt.xlabel('$S_0$')
+        plt.ylabel(' Value')
+        plt.legend()
+        plt.show()
+
+        plt.style.use('ggplot')
+        plt.rcParams['xtick.labelsize'] = 14
+        plt.rcParams['ytick.labelsize'] = 14
+        plt.rcParams['figure.titlesize'] = 18
+        plt.rcParams['figure.titleweight'] = 'medium'
+        plt.rcParams['lines.linewidth'] = 2.5
+
+        # S = stock underlying # K = strike price # Price = premium paid for option
+        def long_call(S, K, Price):
+            # Long Call Payoff = max(Stock Price - Strike Price, 0)     # If we are long a call, we would only elect to call if the current stock price is greater than     # the strike price on our option
+            P = list(map(lambda x: max(x - K, 0) - Price, S))
+            return P
+
+        def long_put(S, K, Price):
+            # Long Put Payoff = max(Strike Price - Stock Price, 0)     # If we are long a call, we would only elect to call if the current stock price is less than     # the strike price on our option
+            P = list(map(lambda x: max(K - x, 0) - Price, S))
+            return P
+
+        S = [t/5 for t in range(0, 1000)]  # Define some series of stock-prices
+        fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 10))
+        fig.suptitle('Payoff Functions for Long/Short Put/Calls',
+                    fontsize=20, fontweight='bold')
+        fig.text(0.5, 0.04, 'Stock/Underlying Price ($)',
+                ha='center', fontsize=14, fontweight='bold')
+        fig.text(0.08, 0.5, 'Option Payoff ($)', va='center',
+                rotation='vertical', fontsize=14, fontweight='bold')
+
+        lc_P = long_call(S, 100, 10)
+        lp_P = long_put(S, 100, 10)
+        plt.subplot(1, 2, 1)
+        plt.plot(S, lc_P, 'r')
+        plt.plot(S, lp_P, 'b')
+        plt.legend(["Long Call", "Long Put"])
+
+        T2 = long_call(S, 120, 10)
+        T4 = long_put(S, 100, 10)
+        plt.subplot(1, 2, 2)
+        plt.plot(S, T2, 'r')
+        plt.plot(S, T4, 'b')
+        plt.legend(["Long Call", "Long Put"])
+        plt.show()

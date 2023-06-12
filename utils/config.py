@@ -19,7 +19,7 @@ T = 0.5  # time until maturity (years)
 r = 0.07  # initial interest rate
 
 # K = np.linspace(.01,2*S0*np.exp(r*T),50)
-K = np.arange(80, 121, 1)  # OTM/ATM/ITM options
+K = np.arange(60, 141, 1)  # OTM/ATM/ITM options
 K = np.array(K).reshape([len(K), 1])  # array of strike prices
 S = np.arange(60, 140, 0.1)
 S = np.array(S).reshape([len(S), 1])  # array of prices

@@ -31,7 +31,7 @@ if __name__ == "__main__":
     N = [2**x for x in range(2, 9, 1)]
     mu = 0
     sigma = 0.25
-    cF = lambda u: np.exp(i * mu * u - 0.5 * np.power(sigma, 2.0) * np.power(u, 2.0))
+    cF = lambda u: np.exp(i * mu * u - 0.5 * sigma**2 * u**2)
     y = np.linspace(0.05, 5, 1000)
 
     dist = lognorm([sigma], loc=mu)

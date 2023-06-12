@@ -34,7 +34,6 @@ def HWEuler(NPaths, NSteps, T, P0T, lambd, eta):
             + eta * (W[:, i + 1] - W[:, i])
         )
         time[i + 1] = time[i] + dt
-        print(f_ZERO_T(time[i]))
     paths = {"time": time, "R": R}
     return paths
 
@@ -46,13 +45,13 @@ if __name__ == "__main__":
 
     pylab.rcParams["figure.figsize"] = (13, 4)
 
-    SAVE = 0
+    SAVE = 1
     NPaths = 1
     NSteps = 20000
     T = 5.0
     lambd = 0.5
     eta = 0.1
-    P0T = lambda T: np.exp(-0.05 * T)
+    P0T = lambda T: np.exp(-0.5 * T)
 
     plt.figure()
     legend = []
@@ -67,8 +66,8 @@ if __name__ == "__main__":
         R = Paths["R"]
         plt.plot(timeGrid, np.transpose(R), color=color[idx])
     plt.grid()
-    plt.title(rf"Effect of mean reversion with ${{\eta}} = $ {eta} and ${{r_0}} = 0.5$")
-    plt.xlabel("time")
+    plt.title(rf"Effect of mean reversion with ${{\eta}}=${eta} and ${{r_0}}=0.5$")
+    plt.xlabel("time T (years)")
     plt.ylabel("R(t)")
     plt.legend(legend)
     if SAVE:
@@ -87,9 +86,9 @@ if __name__ == "__main__":
         plt.plot(timeGrid, np.transpose(R), color=color[idx])
     plt.grid()
     plt.title(
-        rf"Effect of the Volatility with ${{\lambda}} = $ {lambd} and ${{r_0}} = 0.5$"
+        rf"Effect of the Volatility with ${{\lambda}}=${lambd} and ${{r_0}}=0.5$"
     )
-    plt.xlabel("time")
+    plt.xlabel("time T (years)")
     plt.ylabel("R(t)")
     plt.legend(legend, loc="upper left")
     if SAVE:

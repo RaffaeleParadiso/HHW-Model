@@ -152,7 +152,6 @@ if __name__ == "__main__":
 
     FIGURE = True
     SAVE = False
-    DENSITY = False
 
     np.random.seed(1)
 
@@ -173,29 +172,33 @@ if __name__ == "__main__":
     if FIGURE:
         plt.figure()
         plt.plot(K, valueOptMC)
+        plt.title('European Option Value for different Strikes Price (K)')
         plt.legend(["Euler"])
         plt.xlabel("Strike, K")
         plt.ylabel("EU Option Value")
         plt.grid()
         if SAVE:
             plt.savefig("MC.png", bbox_inches="tight")
-        plt.show()
 
         plt.figure()
+        plt.title("Stock Price path")
+        plt.xlabel("Time (t)")
         for i in range(0, 5):
-            plt.title("Stock Price path")
             plt.plot(time_n, S_n[i, :])
-        plt.show()
+        if SAVE:
+            plt.savefig(f"Euler_{T}_StockPaths.png", bbox_inches="tight")
 
         plt.figure()
+        plt.title("Interest rate paths")
+        plt.xlabel("Time (t)")
         for i in range(0, 5):
-            plt.title("Interest rate paths")
             plt.plot(time_n, R_n[i, :])
-        plt.show()
+        if SAVE:
+            plt.savefig(f"Euler_{T}_IRPaths.png", bbox_inches="tight")
 
         plt.figure()
+        plt.title("Numeraire paths")
         for i in range(0, 10):
-            plt.title("Numeraire paths")
             plt.plot(time_n, M_t_n[i, :])
         plt.show()
 
@@ -204,32 +207,3 @@ if __name__ == "__main__":
         np.savetxt("MC_S_n.txt", S_n, fmt="%.4f")
         np.savetxt("MC_R_n.txt", R_n, fmt="%.4f")
         np.savetxt("MC_M_t_n.txt", M_t_n, fmt="%.4f")
-
-    if DENSITY:
-        import scipy.stats as st
-
-        # 3D graph for S(t) for paths versus density
-        plt.figure()
-        ax = plt.axes(projection="3d")
-        zline = np.zeros([len(time_n), 1])
-        # Plot paths
-        n = 40
-        for i in range(0, n, 1):
-            y1 = np.squeeze(np.transpose(S_n[i, :]))
-            x1 = time_n
-            z1 = np.squeeze(zline)
-            ax.plot3D(x1, y1, z1, "blue")
-        ax.view_init(50, -170)
-
-        # Plot densities for X(T)
-        Ti = np.linspace(0, T, 500)
-        # Note that in scipy the scale parameter needs to be in the exponent
-        lognnormPDF = lambda x, t: st.lognorm.pdf(
-            x, scale=np.exp(np.log(S0) + (r - 0.5 * eta * eta) * t), s=np.sqrt(t) * eta
-        )
-        y1 = np.linspace(0, 200, 100)
-        for ti in Ti:
-            x1 = np.zeros([len(y1)]) + ti
-            z1 = lognnormPDF(y1, ti)
-            ax.plot3D(x1, y1, z1, "red")
-        plt.show()
