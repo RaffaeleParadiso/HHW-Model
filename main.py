@@ -151,9 +151,10 @@ if __name__ == "__main__":
         set_params = (P0T, T, kappa, gamma, rhoxr, rhoxv, vbar, v0, lambd, eta)
         start = time.time()
         np.random.seed(1)
-        paths = HHW_Euler(NPaths, NSteps, S0, set_params)
+        paths, _ = HHW_Euler(NPaths, NSteps, S0, set_params)
         S_n = paths["S"]
         M_t_n = paths["M_t"]
+        print(f"{np.mean(S_n[:,-1]):.2f}")
         valueOptMC = OptionPriceFromMonteCarlo(CP, S_n[:, -1], K, M_t_n[:, -1])
         if SAVE:
             np.savetxt(f"raw_data/MC_{T}_{CP}.txt", valueOptMC, fmt="%.4f")
@@ -199,9 +200,14 @@ if __name__ == "__main__":
     if BLACK:
         value_BS = BS(CP, S0, K, v0, 0, T, r)
 
+    zipped = (K.flatten(), valueOptMC.flatten(), valCOS.flatten(), (valCOS-valueOptMC).flatten())
+    print(zipped)
+    np.savetxt("option_value_euler_cos.txt", np.transpose(zipped), delimiter='$&$', fmt="%.5f")
+
+
     if FIGURE:
         plt.figure()
-        plt.title(f"Option Price vs Strike Price for T={T} years", fontsize=10)
+        # plt.title(f"Option Price vs Strike Price for T={T} years", fontsize=10)
         if EULER:
             plt.plot(K, valueOptMC, label="HHW - Euler")
         if AES:
@@ -213,9 +219,28 @@ if __name__ == "__main__":
         plt.legend()
         plt.xlabel("Strike K")
         plt.ylabel("Option Value")
+        plt.xticks(np.arange(min(K), max(K)+1, 10))
         plt.grid()
         if SAVE:
-            plt.savefig(f"figure/HHW_{T}y_{CP}.png", bbox_inches="tight")
+            plt.savefig(f"figure/HHW_NO_BS_{T}y_{CP}.png", bbox_inches="tight", dpi=600)
+        plt.show()
+
+        value_time_step = []
+        for i in range(1, NPaths):
+            value_time_step.append(OptionPriceFromMonteCarlo(CP, S_n[0:i, -1], K, M_t_n[0:i, -1]))
+        value_time_step = np.array(value_time_step).flatten()
+        difference = valCOS-value_time_step
+        print(valCOS)
+        print(difference[0])
+        print(difference[0].shape)
+        plt.figure()
+        plt.grid()
+        plt.xlabel("Number of Paths")
+        plt.ylabel("Option Value (Characteristic Function - Monte Carlo Euler)")
+        plt.ylim(-5, 5)
+        plt.axhline(y = 0, color = 'r', linestyle = '-')
+        plt.plot(difference[0], color='black', label='Difference')
+        plt.savefig(f"figure/Ch-E_{T}Y.png", bbox_inches="tight", dpi=600)
         plt.show()
 
     nx = 0

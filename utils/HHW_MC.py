@@ -124,7 +124,7 @@ def HHW_Euler(NPaths, NSteps, S0, set_params):
     sys.stderr.write("\n")
     S = np.exp(X)  # Compute exponent
     paths = {"time": time, "S": S, "R": R, "M_t": M_t}
-    return paths
+    return paths, V
 
 
 def OptionPriceFromMonteCarlo(CP, S, K, M):
@@ -146,18 +146,18 @@ if __name__ == "__main__":
     from matplotlib import pylab
     from pylab import *
 
-    pylab.rcParams["figure.figsize"] = (13, 4)
+    pylab.rcParams["figure.figsize"] = (10, 4)
 
     from config import *
 
     FIGURE = True
-    SAVE = False
+    SAVE = 1
 
     np.random.seed(1)
 
     set_params = (P0T, T, kappa, gamma, rhoxr, rhoxv, vbar, v0, lambd, eta)
 
-    paths = HHW_Euler(NPaths, NSteps, S0, set_params)
+    paths, Volat = HHW_Euler(NPaths, NSteps, S0, set_params)
 
     time_n = paths["time"]
     S_n = paths["S"]
@@ -178,26 +178,39 @@ if __name__ == "__main__":
         plt.ylabel("EU Option Value")
         plt.grid()
         if SAVE:
-            plt.savefig("MC.png", bbox_inches="tight")
+            plt.savefig("MC.png", bbox_inches="tight", dpi=600)
 
         plt.figure()
-        plt.title("Stock Price path")
-        plt.xlabel("Time (t)")
-        for i in range(0, 5):
+        plt.title("Stock Price paths")
+        plt.xlabel("Time t (years)")
+        plt.grid()
+        for i in range(0, 50):
             plt.plot(time_n, S_n[i, :])
         if SAVE:
-            plt.savefig(f"Euler_{T}_StockPaths.png", bbox_inches="tight")
+            plt.savefig(f"Euler_{T}_StockPaths.png", bbox_inches="tight", dpi=600)
 
         plt.figure()
         plt.title("Interest rate paths")
-        plt.xlabel("Time (t)")
-        for i in range(0, 5):
+        plt.xlabel("Time t (years)")
+        plt.grid()
+        for i in range(0, 50):
             plt.plot(time_n, R_n[i, :])
         if SAVE:
-            plt.savefig(f"Euler_{T}_IRPaths.png", bbox_inches="tight")
+            plt.savefig(f"Euler_{T}_IRPaths.png", bbox_inches="tight", dpi=600)
+
+        plt.figure()
+        plt.title("Stochastic Volatility paths")
+        plt.xlabel("Time t (years)")
+        plt.grid()
+        for i in range(0, 50):
+            plt.plot(time_n, Volat[i, :])
+        if SAVE:
+            plt.savefig(f"Euler_{T}_VolPaths.png", bbox_inches="tight", dpi=600)
 
         plt.figure()
         plt.title("Numeraire paths")
+        plt.xlabel("Time t (years)")
+        plt.grid()
         for i in range(0, 10):
             plt.plot(time_n, M_t_n[i, :])
         plt.show()
